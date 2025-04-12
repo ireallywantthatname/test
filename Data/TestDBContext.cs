@@ -18,6 +18,6 @@ namespace Test.Data
         //     optionsBuilder.UseSqlite(Configuration.GetConnectionString("EmployeeDB"));
         // }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-    => options.UseSqlite($"Data Source=Data/db.db");
+    => options.UseSqlite($"Data Source=Data/test.db");
     }
 }
