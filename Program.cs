@@ -1,10 +1,15 @@
 using test.Components;
+using Test.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("TestDB");
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddDbContextFactory<TestDbContext>(options => options.UseSqlite(connectionString));
 
 var app = builder.Build();
 
