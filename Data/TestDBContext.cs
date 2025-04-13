@@ -13,5 +13,6 @@ namespace Test.Data
         public virtual DbSet<Paper> Papers { get; set; } = null!;
         public virtual DbSet<Question> Questions { get; set; } = null!;
         public virtual DbSet<Answer> Answers { get; set; } = null!;
+        public virtual DbSet<User> Users { get; set; } = null!;
     }
 }
