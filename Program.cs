@@ -1,5 +1,5 @@
 using test.Components;
-using Test.Data;
+using Test.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;

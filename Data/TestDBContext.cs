@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace Test.Data
+namespace Test.Models
 {
     public class TestDbContext(IConfiguration configuration) : DbContext
     {
@@ -10,7 +10,7 @@ namespace Test.Data
         {
             optionsBuilder.UseSqlite(Configuration.GetConnectionString("TestDB"));
         }
-        public virtual DbSet<Paper> Papers { get; set; } = null!;
+        public virtual DbSet<Quiz> Quizzes { get; set; } = null!;
         public virtual DbSet<Question> Questions { get; set; } = null!;
         public virtual DbSet<Answer> Answers { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;

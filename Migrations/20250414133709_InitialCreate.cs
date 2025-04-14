@@ -11,17 +11,32 @@ namespace test.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Papers",
+                name: "Quizzes",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Title = table.Column<string>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: false)
+                    Title = table.Column<string>(type: "TEXT", maxLength: 48, nullable: false),
+                    Description = table.Column<string>(type: "TEXT", maxLength: 192, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Papers", x => x.Id);
+                    table.PrimaryKey("PK_Quizzes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Email = table.Column<string>(type: "TEXT", nullable: false),
+                    Password = table.Column<string>(type: "TEXT", maxLength: 24, nullable: false),
+                    ConfirmPassword = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -30,17 +45,17 @@ namespace test.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Text = table.Column<string>(type: "TEXT", nullable: false),
+                    Text = table.Column<string>(type: "TEXT", maxLength: 384, nullable: false),
                     Difficulty = table.Column<string>(type: "TEXT", nullable: false),
-                    PaperId = table.Column<int>(type: "INTEGER", nullable: false)
+                    QuizId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Questions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Questions_Papers_PaperId",
-                        column: x => x.PaperId,
-                        principalTable: "Papers",
+                        name: "FK_Questions_Quizzes_QuizId",
+                        column: x => x.QuizId,
+                        principalTable: "Quizzes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -51,7 +66,7 @@ namespace test.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Text = table.Column<string>(type: "TEXT", nullable: false),
+                    Text = table.Column<string>(type: "TEXT", maxLength: 192, nullable: false),
                     IsCorrect = table.Column<bool>(type: "INTEGER", nullable: false),
                     QuestionId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
@@ -72,9 +87,9 @@ namespace test.Migrations
                 column: "QuestionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Questions_PaperId",
+                name: "IX_Questions_QuizId",
                 table: "Questions",
-                column: "PaperId");
+                column: "QuizId");
         }
 
         /// <inheritdoc />
@@ -84,10 +99,13 @@ namespace test.Migrations
                 name: "Answers");
 
             migrationBuilder.DropTable(
+                name: "Users");
+
+            migrationBuilder.DropTable(
                 name: "Questions");
 
             migrationBuilder.DropTable(
-                name: "Papers");
+                name: "Quizzes");
         }
     }
 }

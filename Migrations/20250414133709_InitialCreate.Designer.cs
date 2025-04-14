@@ -3,14 +3,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Test.Data;
+using Test.Models;
 
 #nullable disable
 
 namespace test.Migrations
 {
     [DbContext(typeof(TestDbContext))]
-    [Migration("20250412150403_InitialCreate")]
+    [Migration("20250414133709_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -19,7 +19,7 @@ namespace test.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.4");
 
-            modelBuilder.Entity("Test.Data.Answer", b =>
+            modelBuilder.Entity("Test.Models.Answer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,6 +33,7 @@ namespace test.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
+                        .HasMaxLength(192)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -42,26 +43,7 @@ namespace test.Migrations
                     b.ToTable("Answers");
                 });
 
-            modelBuilder.Entity("Test.Data.Paper", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Papers");
-                });
-
-            modelBuilder.Entity("Test.Data.Question", b =>
+            modelBuilder.Entity("Test.Models.Question", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -71,23 +53,69 @@ namespace test.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("PaperId")
+                    b.Property<int>("QuizId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Text")
                         .IsRequired()
+                        .HasMaxLength(384)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PaperId");
+                    b.HasIndex("QuizId");
 
                     b.ToTable("Questions");
                 });
 
-            modelBuilder.Entity("Test.Data.Answer", b =>
+            modelBuilder.Entity("Test.Models.Quiz", b =>
                 {
-                    b.HasOne("Test.Data.Question", "Question")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(192)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(48)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Quizzes");
+                });
+
+            modelBuilder.Entity("Test.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ConfirmPassword")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Test.Models.Answer", b =>
+                {
+                    b.HasOne("Test.Models.Question", "Question")
                         .WithMany()
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -96,15 +124,15 @@ namespace test.Migrations
                     b.Navigation("Question");
                 });
 
-            modelBuilder.Entity("Test.Data.Question", b =>
+            modelBuilder.Entity("Test.Models.Question", b =>
                 {
-                    b.HasOne("Test.Data.Paper", "Paper")
+                    b.HasOne("Test.Models.Quiz", "Quiz")
                         .WithMany()
-                        .HasForeignKey("PaperId")
+                        .HasForeignKey("QuizId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Paper");
+                    b.Navigation("Quiz");
                 });
 #pragma warning restore 612, 618
         }
