@@ -1,0 +1,160 @@
+@page "/new-quiz"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+
+<PageTitle>New Quiz | Test</PageTitle>
+
+<div class="flex flex-col items-center justify-center min-h-screen p-10">
+    <h1 class="text-3xl font-bold mb-4">New Quiz</h1>
+    <hr class="w-48 h-0.5 mx-auto bg-slate-900 rounded-sm mb-8">
+
+    <div class="w-full">
+        <EditForm Model="quiz" OnValidSubmit="handleNewQuiz" FormName="NewQuiz" Enhance>
+            <DataAnnotationsValidator />
+            <div class="max-w-md mx-auto">
+                <div class="mb-6">
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                    <InputText id="title" @bind-Value="quiz.Title"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
+                    <ValidationMessage For="@(() => quiz.Title)" class="text-red-600 text-sm" />
+                </div>
+                <div class="mb-6">
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <InputTextArea id="description" @bind-Value="quiz.Description" rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
+                    <ValidationMessage For="@(() => quiz.Description)" class="text-red-600 text-sm" />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @foreach (var question in questions)
+                {
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="mb-4">
+                            <label for="questionText" class="block text-sm font-medium text-gray-700 mb-2">Question
+                                Text</label>
+                            <InputTextArea id="questionText" @bind-Value="question.Text"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
+                            <ValidationMessage For="@(() => question.Text)" class="text-red-600 text-sm" />
+                        </div>
+                        <div class="mb-4">
+                            <label for="questionDifficulty"
+                                class="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
+                            <InputSelect id="questionDifficulty" @bind-Value="question.Difficulty"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+                                <option></option>
+                                @foreach (var difficulty in difficulties)
+                                {
+                                    <option value="@difficulty">@difficulty</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => question.Difficulty)" class="text-red-600 text-sm" />
+                        </div>
+                        <div class="mb-4">
+                            @foreach (var answer in questionAnswers[question])
+                            {
+                                <div class="flex items-center gap-3 mb-2">
+                                    <InputText @bind-Value="answer.Text" placeholder="Answer text"
+                                        class="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
+                                    <ValidationMessage For="@(() => answer.Text)" class="text-red-600 text-sm" />
+                                    <label class="flex items-center gap-2">
+                                        <InputCheckbox @bind-Value="answer.IsCorrect"
+                                            class="w-4 h-4 text-slate-600 focus:ring-slate-500 border-gray-300 rounded" />
+                                        <span class="text-sm text-gray-700">Correct</span>
+                                        <ValidationMessage For="@(() => answer.IsCorrect)" class="text-red-600 text-sm" />
+                                    </label>
+                                    <button @onclick="() => RemoveAnswer(question, answer)"
+                                        class="px-3 py-1 text-sm text-red-600 hover:text-red-800 focus:outline-none">
+                                        Remove
+                                    </button>
+                                </div>
+                            }
+                            <button @onclick="() => AddAnswer(question)"
+                                class="mt-2 px-4 py-2 text-sm bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200">
+                                Add Answer
+                            </button>
+                        </div>
+                        <button @onclick="() => RemoveQuestion(question)"
+                            class="px-4 py-2 text-sm text-red-600 border border-red-600 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200">
+                            Remove Question
+                        </button>
+                    </div>
+                }
+                <button @onclick="AddQuestion"
+                    class="h-full px-4 py-2 text-slate-900 border border-slate-900 rounded-md hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200">
+                    Add Question
+                </button>
+            </div>
+            <div class="max-w-md mx-auto">
+                <button type="submit"
+                    class="w-full bg-slate-900 text-white py-2 px-4 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200 my-4">
+                    Save
+                </button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Quiz quiz { get; set; } = new();
+
+    private List<Question> questions = new();
+    private Dictionary<Question, List<Answer>> questionAnswers = new();
+    private readonly string[] difficulties = { "Easy", "Medium", "Hard" };
+
+    protected override void OnInitialized() => quiz ??= new();
+
+    private async Task handleNewQuiz(EditContext args)
+    {
+        try
+        {
+            DbContext.Quizzes.Add(quiz);
+            await DbContext.SaveChangesAsync();
+
+            foreach (var question in questions)
+            {
+                question.QuizId = quiz.Id;
+                DbContext.Questions.Add(question);
+                await DbContext.SaveChangesAsync();
+
+                foreach (var answer in questionAnswers[question])
+                {
+                    answer.QuestionId = question.Id;
+                    DbContext.Answers.Add(answer);
+                }
+            }
+
+            await DbContext.SaveChangesAsync();
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving quiz: {ex.Message}");
+        }
+    }
+
+    private void AddQuestion()
+    {
+        var question = new Question();
+        questions.Add(question);
+        questionAnswers[question] = new List<Answer>();
+        AddAnswer(question);
+    }
+
+    private void RemoveQuestion(Question question)
+    {
+        questions.Remove(question);
+        questionAnswers.Remove(question);
+    }
+
+    private void AddAnswer(Question question)
+    {
+        questionAnswers[question].Add(new Answer());
+    }
+
+    private void RemoveAnswer(Question question, Answer answer)
+    {
+        questionAnswers[question].Remove(answer);
+    }
+}

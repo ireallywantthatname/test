@@ -1,0 +1,144 @@
+﻿@page "/create"
+@rendermode InteractiveServer
+
+<PageTitle>Create | Test</PageTitle>
+
+<div class="flex flex-col items-center justify-center min-h-screen p-4 md:min-w-lvw sm:min-w-md">
+    <h1 class="text-3xl font-bold mb-4">Create</h1>
+    <hr class="w-48 h-0.5 mx-auto bg-slate-900 rounded-sm mb-8">
+
+    <div class="w-full max-w-md">
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
+            <input @bind="paper.Title"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
+        </div>
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+            <textarea @bind="paper.Description" rows="3"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"></textarea>
+        </div>
+    </div>
+
+    <div class="mb-6 md:max-w-lvw sm:max-w-md">
+        @* <h2 class="text-2xl font-bold mb-4 text-center">Questions</h2> *@
+        <div class="grid md:grid-cols-3 sm:grid-cols-1 gap-4">
+            @foreach (var question in questions)
+            {
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Question Text</label>
+                        <input @bind="question.Text"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
+                        <select @bind="question.Difficulty"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <h3 class="text-xl font-semibold mb-3">Answers</h3>
+                        @foreach (var answer in questionAnswers[question])
+                        {
+                            <div class="flex items-center gap-3 mb-2">
+                                <input @bind="answer.Text" placeholder="Answer text"
+                                    class="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" @bind="answer.IsCorrect"
+                                        class="w-4 h-4 text-slate-600 focus:ring-slate-500 border-gray-300 rounded" />
+                                    <span class="text-sm text-gray-700">Correct</span>
+                                </label>
+                                <button @onclick="() => RemoveAnswer(question, answer)"
+                                    class="px-3 py-1 text-sm text-red-600 hover:text-red-800 focus:outline-none">
+                                    Remove
+                                </button>
+                            </div>
+                        }
+                        <button @onclick="() => AddAnswer(question)"
+                            class="mt-2 px-4 py-2 text-sm bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200">
+                            Add Answer
+                        </button>
+                    </div>
+                    <button @onclick="() => RemoveQuestion(question)"
+                        class="px-4 py-2 text-sm text-red-600 border border-red-600 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200">
+                        Remove Question
+                    </button>
+                </div>
+            }
+            <button @onclick="AddQuestion"
+                class="max-w-md min-h-full px-4 py-2 text-slate-900 border border-s-slate-900 rounded-md hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200 mb-4">
+                Add Question
+            </button>
+        </div>
+    </div>
+    <button @onclick="SavePaper"
+        class="max-w-md bg-slate-900 text-white py-2 px-4 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200 my-4">
+        Save
+    </button>
+</div>
+
+@code {
+    private Quiz paper = new();
+    private List<Question> questions = new();
+    private Dictionary<Question, List<Answer>> questionAnswers = new();
+
+    private void AddQuestion()
+    {
+        var question = new Question { Difficulty = "Easy" };
+        questions.Add(question);
+        questionAnswers[question] = new List<Answer>();
+        AddAnswer(question);
+    }
+
+    private void RemoveQuestion(Question question)
+    {
+        questions.Remove(question);
+        questionAnswers.Remove(question);
+    }
+
+    private void AddAnswer(Question question)
+    {
+        questionAnswers[question].Add(new Answer());
+    }
+
+    private void RemoveAnswer(Question question, Answer answer)
+    {
+        questionAnswers[question].Remove(answer);
+    }
+
+    private async Task SavePaper()
+    {
+        try
+        {
+            DbContext.Quizzes.Add(paper);
+            await DbContext.SaveChangesAsync();
+
+            foreach (var question in questions)
+            {
+                question.QuizId = paper.Id;
+                DbContext.Questions.Add(question);
+                await DbContext.SaveChangesAsync();
+
+                foreach (var answer in questionAnswers[question])
+                {
+                    answer.QuestionId = question.Id;
+                    DbContext.Answers.Add(answer);
+                }
+            }
+
+            await DbContext.SaveChangesAsync();
+
+            paper = new();
+            questions.Clear();
+            questionAnswers.Clear();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving paper: {ex.Message}");
+        }
+    }
+}
