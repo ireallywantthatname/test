@@ -10,12 +10,12 @@
     <div class="w-full max-w-md">
         <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
-            <input @bind="paper.Title"
+            <input @bind="paper.QuizName"
                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
         </div>
         <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-            <textarea @bind="paper.Description" rows="3"
+            <textarea @bind="paper.QuizDescription" rows="3"
                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"></textarea>
         </div>
     </div>
@@ -28,16 +28,16 @@
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Question Text</label>
-                        <input @bind="question.Text"
+                        <input @bind="question.QuestionBody"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
-                        <select @bind="question.Difficulty"
+                        <select @bind="question.QuestionDifficulty"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
-                            <option value="Easy">Easy</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Hard">Hard</option>
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
                         </select>
                     </div>
                     <div class="mb-4">
@@ -45,7 +45,7 @@
                         @foreach (var answer in questionAnswers[question])
                         {
                             <div class="flex items-center gap-3 mb-2">
-                                <input @bind="answer.Text" placeholder="Answer text"
+                                <input @bind="answer.Body" placeholder="Answer text"
                                     class="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
                                 <label class="flex items-center gap-2">
                                     <input type="checkbox" @bind="answer.IsCorrect"
@@ -88,7 +88,7 @@
 
     private void AddQuestion()
     {
-        var question = new Question { Difficulty = "Easy" };
+        var question = new Question();
         questions.Add(question);
         questionAnswers[question] = new List<Answer>();
         AddAnswer(question);
@@ -119,13 +119,13 @@
 
             foreach (var question in questions)
             {
-                question.QuizId = paper.Id;
+                question.QuizID = paper.QuizId;
                 DbContext.Questions.Add(question);
                 await DbContext.SaveChangesAsync();
 
                 foreach (var answer in questionAnswers[question])
                 {
-                    answer.QuestionId = question.Id;
+                    answer.QuestionID = question.QuestionID;
                     DbContext.Answers.Add(answer);
                 }
             }

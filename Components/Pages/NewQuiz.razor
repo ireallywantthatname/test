@@ -14,15 +14,15 @@
             <div class="max-w-md mx-auto">
                 <div class="mb-6">
                     <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Title</label>
-                    <InputText id="title" @bind-Value="quiz.Title"
+                    <InputText id="title" @bind-Value="quiz.QuizName"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
-                    <ValidationMessage For="@(() => quiz.Title)" class="text-red-600 text-sm" />
+                    <ValidationMessage For="@(() => quiz.QuizName)" class="text-red-600 text-sm" />
                 </div>
                 <div class="mb-6">
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                    <InputTextArea id="description" @bind-Value="quiz.Description" rows="3"
+                    <InputTextArea id="description" @bind-Value="quiz.QuizDescription" rows="3"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
-                    <ValidationMessage For="@(() => quiz.Description)" class="text-red-600 text-sm" />
+                    <ValidationMessage For="@(() => quiz.QuizDescription)" class="text-red-600 text-sm" />
                 </div>
             </div>
 
@@ -33,14 +33,14 @@
                         <div class="mb-4">
                             <label for="questionText" class="block text-sm font-medium text-gray-700 mb-2">Question
                                 Text</label>
-                            <InputTextArea id="questionText" @bind-Value="question.Text"
+                            <InputTextArea id="questionText" @bind-Value="question.QuestionBody"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
-                            <ValidationMessage For="@(() => question.Text)" class="text-red-600 text-sm" />
+                            <ValidationMessage For="@(() => question.QuestionBody)" class="text-red-600 text-sm" />
                         </div>
                         <div class="mb-4">
                             <label for="questionDifficulty"
                                 class="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
-                            <InputSelect id="questionDifficulty" @bind-Value="question.Difficulty"
+                            <InputSelect id="questionDifficulty" @bind-Value="question.QuestionDifficulty"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
                                 <option></option>
                                 @foreach (var difficulty in difficulties)
@@ -48,15 +48,15 @@
                                     <option value="@difficulty">@difficulty</option>
                                 }
                             </InputSelect>
-                            <ValidationMessage For="@(() => question.Difficulty)" class="text-red-600 text-sm" />
+                            <ValidationMessage For="@(() => question.QuestionDifficulty)" class="text-red-600 text-sm" />
                         </div>
                         <div class="mb-4">
                             @foreach (var answer in questionAnswers[question])
                             {
                                 <div class="flex items-center gap-3 mb-2">
-                                    <InputText @bind-Value="answer.Text" placeholder="Answer text"
+                                    <InputText @bind-Value="answer.Body" placeholder="Answer text"
                                         class="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
-                                    <ValidationMessage For="@(() => answer.Text)" class="text-red-600 text-sm" />
+                                    <ValidationMessage For="@(() => answer.Body)" class="text-red-600 text-sm" />
                                     <label class="flex items-center gap-2">
                                         <InputCheckbox @bind-Value="answer.IsCorrect"
                                             class="w-4 h-4 text-slate-600 focus:ring-slate-500 border-gray-300 rounded" />
@@ -114,13 +114,13 @@
 
             foreach (var question in questions)
             {
-                question.QuizId = quiz.Id;
+                question.QuizID = quiz.QuizId;
                 DbContext.Questions.Add(question);
                 await DbContext.SaveChangesAsync();
 
                 foreach (var answer in questionAnswers[question])
                 {
-                    answer.QuestionId = question.Id;
+                    answer.QuestionID = question.QuestionID;
                     DbContext.Answers.Add(answer);
                 }
             }
