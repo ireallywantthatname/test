@@ -1,15 +1,26 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 
 namespace Test.Models
 {
-    public class TestDbContext(IConfiguration configuration) : DbContext
+    public class TestDbContext : IdentityDbContext<IdentityUser>
     {
-        protected readonly IConfiguration Configuration = configuration;
+        private readonly IConfiguration? _configuration;
+
+        // Default constructor for EF Core tooling
+        public TestDbContext(DbContextOptions<TestDbContext> options)
+            : base(options)
+        {
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite(Configuration.GetConnectionString("TestDB"));
+            // Nothing needed here as options are configured in Program.cs
+            // and in DesignTimeDbContextFactory for migrations
         }
+
         public virtual DbSet<Quiz> Quizzes { get; set; } = null!;
         public virtual DbSet<Question> Questions { get; set; } = null!;
         public virtual DbSet<Answer> Answers { get; set; } = null!;
@@ -22,6 +33,8 @@ namespace Test.Models
         // to handle many-to-many relationship
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder); // Important: This adds the Identity model configuration
+
             modelBuilder.Entity<StudentEducator>()
                 .HasKey(se => new { se.StudentID, se.EducatorID });
 
@@ -36,6 +49,4 @@ namespace Test.Models
                 .HasForeignKey(se => se.EducatorID);
         }
     }
-
-
 }

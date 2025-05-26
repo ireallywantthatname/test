@@ -159,8 +159,9 @@
                 await DbContext.SaveChangesAsync();
 
                 Logger.LogInformation("Student registration successful for username: {Username}", student.Username);
-                await SignInManager.SignInAsync(identityUser, isPersistent: false);
-                Navigation.NavigateTo("/");
+                
+                // Don't sign in here - instead redirect to login page
+                Navigation.NavigateTo("/login?role=student");
             }
             else
             {
@@ -196,8 +197,9 @@
                 await DbContext.SaveChangesAsync();
 
                 Logger.LogInformation("Educator registration successful for username: {Username}", educator.Username);
-                await SignInManager.SignInAsync(identityUser, isPersistent: false);
-                Navigation.NavigateTo("/");
+                
+                // Don't sign in here - instead redirect to login page
+                Navigation.NavigateTo("/login?role=educator");
             }
             else
             {
