@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Test.Models
 {
@@ -15,10 +16,6 @@ namespace Test.Models
         [StringLength(24, MinimumLength = 8)]
         [RegularExpression(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")]
         public string Password {get; set; } = null!;
-
-        [Required]
-        [Compare("Password")]
-        public string ConfirmPassword { get; set; } = null!;
 
         public virtual ICollection<StudentEducator> StudentEducators { get; set; } = new List<StudentEducator>();
     }
