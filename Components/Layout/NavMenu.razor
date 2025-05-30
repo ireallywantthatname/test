@@ -1,0 +1,58 @@
+@page "/sanadee"
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+
+<div class="bg-slate-950 md:h-screen md:w-64 sm:w-screen sm:h-auto absolute left-0 flex flex-col items-center justify-start py-4">
+
+    <img src="assets/logo.PNG" class="w-20 h-20 mb-8 mt-4" />
+    
+    <nav class="flex flex-col space-y-4 w-full px-4">
+        <button @onclick='() => Navigation.NavigateTo("/dashboard")'
+            class="text-slate-100 text-xl hover:bg-slate-100 hover:text-slate-950 p-3 rounded transition-all duration-500 flex items-center space-x-3">
+            <svg class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2ZM12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4ZM12 5C13.018 5 13.9852 5.21731 14.8579 5.60806L13.2954 7.16944C12.8822 7.05892 12.448 7 12 7C9.23858 7 7 9.23858 7 12C7 13.3807 7.55964 14.6307 8.46447 15.5355L7.05025 16.9497L6.89445 16.7889C5.71957 15.5368 5 13.8525 5 12C5 8.13401 8.13401 5 12 5ZM18.3924 9.14312C18.7829 10.0155 19 10.9824 19 12C19 13.933 18.2165 15.683 16.9497 16.9497L15.5355 15.5355C16.4404 14.6307 17 13.3807 17 12C17 11.552 16.9411 11.1178 16.8306 10.7046L18.3924 9.14312ZM16.2426 6.34315L17.6569 7.75736L13.9325 11.483C13.9765 11.6479 14 11.8212 14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12C10 10.8954 10.8954 10 12 10C12.1788 10 12.3521 10.0235 12.517 10.0675L16.2426 6.34315Z"></path>
+            </svg>
+            <span>Dashboard</span>
+        </button>
+
+        <button @onclick='() => Navigation.NavigateTo("/create")'
+            class="text-slate-100 text-xl hover:bg-slate-100 hover:text-slate-950 p-3 rounded transition-all duration-500 flex items-center space-x-3">
+            <svg class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 9H16V11H8V9ZM8 15V13H16V15H8ZM2 12C2 6.47717 6.47717 2 12 2 17.5228 2 22 6.47717 22 12 22 17.5228 17.5228 22 12 22 6.47717 22 2 17.5228 2 12ZM12 4C7.58167 4 4 7.58167 4 12 4 16.4183 7.58167 20 12 20 16.4183 20 20 16.4183 20 12 20 7.58167 16.4183 4 12 4Z"></path>
+            </svg>
+            <span>Create Quiz</span>
+        </button>
+
+        <button @onclick='() => Navigation.NavigateTo("/quiz/read")'
+            class="text-slate-100 text-xl hover:bg-slate-100 hover:text-slate-950 p-3 rounded transition-all duration-500 flex items-center space-x-3">
+            <svg class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M13 21V23H11V21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3H9C10.1947 3 11.2671 3.52375 12 4.35418C12.7329 3.52375 13.8053 3 15 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H13ZM20 19V5H15C13.8954 5 13 5.89543 13 7V19H20ZM11 19V7C11 5.89543 10.1046 5 9 5H4V19H11Z"></path>
+            </svg>
+            <span>Read Quiz</span>
+        </button>
+
+        <button @onclick='() => Navigation.NavigateTo("/quiz/delete")'
+            class="text-slate-100 text-xl hover:bg-slate-100 hover:text-slate-950 p-3 rounded transition-all duration-500 flex items-center space-x-3">
+            <svg class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM18 8H6V20H18V8ZM9 11H11V17H9V11ZM13 11H15V17H13V11ZM9 4V6H15V4H9Z"></path>
+            </svg>
+            <span>Delete Quiz</span>
+        </button>
+
+        <button @onclick='() => Navigation.NavigateTo("/assistant")'
+            class="text-slate-100 text-xl hover:bg-slate-100 hover:text-slate-950 p-3 rounded transition-all duration-500 flex items-center space-x-3">
+            <svg class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.7134 10.1281L17.4668 10.6938C17.2864 11.1079 16.7136 11.1079 16.5331 10.6938L16.2866 10.1281C15.8471 9.11947 15.0555 8.31641 14.0677 7.87708L13.308 7.53922C12.8973 7.35653 12.8973 6.75881 13.308 6.57612L14.0252 6.25714C15.0384 5.80651 15.8442 4.97373 16.2761 3.93083L16.5293 3.31953C16.7058 2.89349 17.2942 2.89349 17.4706 3.31953L17.7238 3.93083C18.1558 4.97373 18.9616 5.80651 19.9748 6.25714L20.6919 6.57612C21.1027 6.75881 21.1027 7.35653 20.6919 7.53922L19.9323 7.87708C18.9445 8.31641 18.1529 9.11947 17.7134 10.1281ZM2.82843 12.0001L7.07107 16.2428L5.65685 17.657L0 12.0001L5.65685 6.34326L7.07107 7.75748L2.82843 12.0001ZM18.3429 17.6572L23.9998 12.0003L21.1714 9.17188L19.7571 10.5861L21.1714 12.0003L16.9287 16.2429L18.3429 17.6572Z"></path>
+            </svg>
+            <span>Assistant</span>
+        </button>
+    </nav>
+
+    <button @onclick='() => Navigation.NavigateTo("/auth")'
+        class="text-slate-100 text-xl hover:bg-slate-100 hover:text-slate-950 p-3 rounded transition-all duration-500 flex items-center space-x-3 mt-auto mb-4 mx-4">
+        <svg class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 22H18V20C18 18.3431 16.6569 17 15 17H9C7.34315 17 6 18.3431 6 20V22H4V20C4 17.2386 6.23858 15 9 15H15C17.7614 15 20 17.2386 20 20V22ZM12 13C8.68629 13 6 10.3137 6 7C6 3.68629 8.68629 1 12 1C15.3137 1 18 3.68629 18 7C18 10.3137 15.3137 13 12 13ZM12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z"></path>
+        </svg>
+        <span>Register / Login</span>
+    </button>
+</div>

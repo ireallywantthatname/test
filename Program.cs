@@ -12,16 +12,56 @@ var connectionString = builder.Configuration.GetConnectionString("TestDB");
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
 // Configure DbContext with SQLite
-builder.Services.AddDbContextFactory<TestDbContext>(options => options.UseSqlite(connectionString));
+builder.Services.AddDbContext<TestDbContext>(options => options.UseSqlite(connectionString));
+
+// Register factory with correct lifetime (scoped instead of singleton)
+builder.Services.AddDbContextFactory<TestDbContext>(options => options.UseSqlite(connectionString),
+    lifetime: ServiceLifetime.Scoped); // Change from default singleton to scoped
+
 // Configure Identity
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false; // Disable email confirmation for testing
-    options.Lockout.MaxFailedAccessAttempts = 10;    // Increase to prevent lockout during testing
+    options.Lockout.MaxFailedAccessAttempts = 10;   // Increase to prevent lockout during testing
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); // Adjust lockout time
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 8;
 })
-    .AddEntityFrameworkStores<TestDbContext>();
+.AddEntityFrameworkStores<TestDbContext>();
+
+// Add authentication services
+builder.Services.AddAuthentication(options => 
+{
+    options.DefaultScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+});
+
+// Add authorization services and define policies
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("EducatorOnly", policy =>
+        policy.RequireAssertion(context =>
+        {
+            var user = context.User;
+            // Check for the "UserType" claim with value "Educator"
+            return user.Identity?.IsAuthenticated == true && 
+                  user.HasClaim(c => c.Type == "UserType" && c.Value == "Educator");
+        }));
+});
+
+// Configure cookie policy for authorization
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.AccessDeniedPath = "/access-denied";
+    
+    // This will still redirect unauthenticated users to the login page
+    options.LoginPath = "/login";
+});
 
 var app = builder.Build();
 
@@ -34,12 +74,18 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-
+app.UseStaticFiles();
 app.UseAntiforgery();
+
+// Add these middleware components for Identity
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+// Map Identity endpoints (login, register, etc.)
+app.MapIdentityApi<IdentityUser>();
 
 app.Run();

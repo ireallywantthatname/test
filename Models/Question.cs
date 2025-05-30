@@ -1,19 +1,26 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Test.Models
 {
     public class Question
     {
-        public int Id { get; set; }
-
+        public int QuestionID { get; set; }
+    
+        public string QuestionBody { get; set; } = null!;
+    
+        public enum Difficulty {
+            easy,
+            medium,
+            hard
+        }
+    
         [Required]
-        [StringLength(384, MinimumLength = 2)]
-        public string Text { get; set; } = null!;
+        public Difficulty QuestionDifficulty { get; set; }
 
-        [Required]
-        public string Difficulty { get; set; } = null!;
-
-        public int QuizId { get; set; }
+        [ForeignKey("Quiz")]
+        public int QuizID { get; set; }
 
         public virtual Quiz Quiz { get; set; } = null!;
     }
