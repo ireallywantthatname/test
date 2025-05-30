@@ -1,8 +1,10 @@
 @page "/login"
 @using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.WebUtilities
 @using Microsoft.EntityFrameworkCore
+@inject UserManager<IdentityUser> UserManager
 @inject SignInManager<IdentityUser> SignInManager
 @inject NavigationManager Navigation
 @inject ILogger<Login> Logger
@@ -25,91 +27,72 @@
         </div>
     }
 
-    @if (Role == "student")
-    {
-        <div class="w-full max-w-md">
-            <EditForm Model="studentModel" OnSubmit="HandleStudentLogin" FormName="studentLoginForm" method="post">
-                <div class="mb-6">
-                    <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                    <InputText id="username" @bind-Value="studentModel!.Username" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
-                </div>
+    <div class="w-full max-w-md">
+        <EditForm Model="loginModel" OnSubmit="HandleLogin" FormName="loginForm" method="post">
+            <div class="mb-6">
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                <InputText id="username" @bind-Value="loginModel.Username" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
+            </div>
 
-                <div class="mb-6">
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                    <InputText id="password" @bind-Value="studentModel!.Password" type="password" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
-                </div>
+            <div class="mb-6">
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                <InputText id="password" @bind-Value="loginModel.Password" type="password" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
+            </div>
 
-                <button type="submit"
-                    class="w-full bg-slate-900 text-white py-2 px-4 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200">
-                    Student Login
-                </button>
-            </EditForm>
+            <button type="submit"
+                class="w-full bg-slate-900 text-white py-2 px-4 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200">
+                Login
+            </button>
+        </EditForm>
+
+        <div class="mt-4 text-center">
+            <p class="text-sm text-gray-600">
+                Don't have an account? <a href="/" class="text-slate-800 hover:underline">Register here</a>
+            </p>
         </div>
-    }
-    else if (Role == "educator")
-    {
-        <div class="w-full max-w-md">
-            <EditForm Model="educatorModel" OnSubmit="HandleEducatorLogin" FormName="educatorLoginForm" method="post">
-                <div class="mb-6">
-                    <label for="educatorUsername" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                    <InputText id="educatorUsername" @bind-Value="educatorModel!.Username" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
-                </div>
-
-                <div class="mb-6">
-                    <label for="educatorPassword" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                    <InputText id="educatorPassword" @bind-Value="educatorModel.Password" type="password" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
-                </div>
-
-                <button type="submit"
-                    class="w-full bg-slate-900 text-white py-2 px-4 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200">
-                    Educator Login
-                </button>
-            </EditForm>
-        </div>
-    }
-    else {
-        Navigation.NavigateTo("/");
-    }
+    </div>
 </div>
 
+@if (shouldRedirect)
+{
+    <div class="flex flex-col items-center justify-center min-h-screen p-4">
+        <h3>Redirecting...</h3>
+        <meta http-equiv="refresh" content="0;url=@redirectUrl" />
+    </div>
+}
+
 @code {
-    [Parameter]
-    public string? Role { get; set; }
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
 
     [SupplyParameterFromQuery]
     public string? Error { get; set; }
 
-    [SupplyParameterFromForm]
-    public Student? studentModel { get; set; } = new Student();
+    private class LoginViewModel
+    {
+        [Required]
+        public string Username { get; set; } = string.Empty;
+
+        [Required]
+        public string Password { get; set; } = string.Empty;
+    }
 
     [SupplyParameterFromForm]
-    public Educator? educatorModel { get; set; } = new Educator();
+    private LoginViewModel loginModel { get; set; } = new LoginViewModel();
 
-    private List<string> errors = new List<string>();
 
-    [CascadingParameter]
-    private HttpContext? HttpContext { get; set; }
+    private List<string> errors = new();
+    private bool shouldRedirect = false;
+    private string redirectUrl = string.Empty;
 
     protected override void OnInitialized()
     {
-        // Parse query parameters
-        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-        var query = QueryHelpers.ParseQuery(uri.Query);
-
-        // Set role from query parameter
-        if (query.TryGetValue("role", out var roleValue))
+        // Handle error messages from query parameters
+        if (!string.IsNullOrEmpty(Error))
         {
-            Role = roleValue.ToString().ToLower();
-        }
-        
-        // Handle error messages
-        if (query.TryGetValue("error", out var errorValue))
-        {
-            switch (errorValue.ToString())
+            switch (Error)
             {
                 case "invalid":
                     errors.Add("Invalid username or password.");
@@ -128,123 +111,76 @@
                     break;
             }
         }
-        else {
-            studentModel ??= new();
-            educatorModel ??= new();
-        }
     }
 
-    private async Task HandleStudentLogin()
+    private async Task HandleLogin()
     {
-        Role = "student";
+        errors.Clear();
         
-        // Debug to verify values
-        Logger.LogInformation($"Attempting login with Username: {studentModel?.Username}, Password length: {studentModel?.Password?.Length ?? 0}");
-        
-        // Check for null values first
-        if (string.IsNullOrEmpty(studentModel!.Username) || string.IsNullOrEmpty(studentModel.Password))
-        {
-            Logger.LogWarning("Login attempted with null or empty credentials");
-            Navigation.NavigateTo("/login?role=student&error=invalid", forceLoad: true);
-            return;
-        }
-        
-        // First validate against your custom Student model
-        var dbStudent = await DbContext.Students
-            .FirstOrDefaultAsync(s => s.Username == studentModel.Username);
-        
-        if (dbStudent == null)
-        {
-            // Student not found in custom database
-            Logger.LogWarning("Student not found in custom database: {Username}", studentModel.Username);
-            Navigation.NavigateTo("/login?role=student&error=notfound", forceLoad: true);
-            return;
-        }
-        
-        // Check password separately (better approach for debugging)
-        if (dbStudent.Password != studentModel.Password)
-        {
-            Logger.LogWarning("Invalid password for username: {Username}", studentModel.Username);
-            Navigation.NavigateTo("/login?role=student&error=invalid", forceLoad: true);
-            return;
-        }
-        
-        // Then proceed with Identity authentication
-        await ProcessLogin(studentModel.Username, studentModel.Password);
-    }
-
-    private async Task HandleEducatorLogin()
-    {
-        Role = "educator";
-        
-        // First validate against your custom Educator model
-        var dbEducator = await DbContext.Educators
-            .FirstOrDefaultAsync(e => e.Username == educatorModel!.Username && e.Password == educatorModel.Password);
-            
-        if (dbEducator == null)
-        {
-            // Educator not found in custom database
-            Logger.LogWarning("Educator not found in custom database: {Username}", educatorModel!.Username);
-            Navigation.NavigateTo("/login?role=educator&error=notfound", forceLoad: true);
-            return;
-        }
-        
-        // Then proceed with Identity authentication
-        await ProcessLogin(educatorModel!.Username, educatorModel.Password);
-    }
-
-    private bool shouldRedirect = false;
-    private string redirectUrl = string.Empty;
-
-    // Handle the form submission
-    private async Task ProcessLogin(string username, string password)
-    {
         try
         {
-            Logger.LogInformation("User login attempt for username: {Username}", username);
+            Logger.LogInformation("User login attempt for username: {Username}", loginModel.Username);
             
             var result = await SignInManager.PasswordSignInAsync(
-                username, 
-                password, 
+                loginModel.Username, 
+                loginModel.Password, 
                 isPersistent: false, 
                 lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
-                Logger.LogInformation("User login successful for username: {Username}", username);
-                if (Role == "student")
+                Logger.LogInformation("User login successful for username: {Username}", loginModel.Username);
+                
+                // Get user and check claims to determine redirect
+                var user = await UserManager.FindByNameAsync(loginModel.Username);
+                
+                if (user != null)
                 {
-                    redirectUrl = "/";
+                    var claims = await UserManager.GetClaimsAsync(user);
+                    var userTypeClaim = claims.FirstOrDefault(c => c.Type == "UserType");
+                    
+                    if (userTypeClaim?.Value == "Educator")
+                    {
+                        redirectUrl = "/create";
+                    }
+                    else
+                    {
+                        // Default to home page for students or unknown user types
+                        redirectUrl = "/";
+                    }
+                    
+                    // Use return URL if specified
+                    if (!string.IsNullOrEmpty(ReturnUrl))
+                    {
+                        redirectUrl = ReturnUrl;
+                    }
+                    
+                    shouldRedirect = true;
                 }
-                else
-                {
-                    redirectUrl = "/create";
-                }
-                shouldRedirect = true;
             }
             else
             {
                 // Handle login failure
-                var errorParam = result.IsLockedOut ? "locked" : 
-                                result.IsNotAllowed ? "notallowed" : "invalid";
-                                
-                redirectUrl = $"/login?role={Role}&error={errorParam}";
-                shouldRedirect = true;
+                Logger.LogWarning("Login failed for username: {Username}", loginModel.Username);
+                
+                if (result.IsLockedOut)
+                {
+                    errors.Add("Your account is locked out. Please try again later.");
+                }
+                else if (result.IsNotAllowed)
+                {
+                    errors.Add("Login is not allowed. Please confirm your email or contact support.");
+                }
+                else
+                {
+                    errors.Add("Invalid username or password.");
+                }
             }
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "An error occurred during login for username: {Username}", username);
-            redirectUrl = $"/login?role={Role}&error=unexpected";
-            shouldRedirect = true;
+            Logger.LogError(ex, "An error occurred during login for username: {Username}", loginModel.Username);
+            errors.Add("An unexpected error occurred. Please try again later.");
         }
     }
-}
-
-@if (shouldRedirect)
-{
-    <div class="flex flex-col items-center justify-center min-h-screen p-4">
-        <h3>Redirecting...</h3>
-        <meta http-equiv="refresh" content="0;url=@redirectUrl" />
-    </div>
 }

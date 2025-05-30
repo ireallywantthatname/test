@@ -1,6 +1,7 @@
 @page "/register"
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.WebUtilities
 @inject UserManager<IdentityUser> UserManager
@@ -164,6 +165,10 @@
 
             if (result.Succeeded)
             {
+                // Add a claim to identify this user as a Student
+                var userTypeClaim = new Claim("UserType", "Student");
+                await UserManager.AddClaimAsync(identityUser, userTypeClaim);
+                
                 // Save the user to our custom database
                 await DbContext.Students.AddAsync(student);
                 await DbContext.SaveChangesAsync();
@@ -171,7 +176,7 @@
                 Logger.LogInformation("Student registration successful for username: {Username}", student.Username);
                 
                 // Don't sign in here - instead redirect to login page
-                Navigation.NavigateTo("/login?role=student");
+                Navigation.NavigateTo("/login");
             }
             else
             {
@@ -210,6 +215,10 @@
 
             if (result.Succeeded)
             {
+                // Add a claim to identify this user as an Educator
+                var userTypeClaim = new Claim("UserType", "Educator");
+                await UserManager.AddClaimAsync(identityUser, userTypeClaim);
+                
                 // Save the user to our custom database
                 await DbContext.Educators.AddAsync(educator);
                 await DbContext.SaveChangesAsync();
@@ -217,7 +226,7 @@
                 Logger.LogInformation("Educator registration successful for username: {Username}", educator.Username);
                 
                 // Don't sign in here - instead redirect to login page
-                Navigation.NavigateTo("/login?role=educator");
+                Navigation.NavigateTo("/login");
             }
             else
             {

@@ -41,8 +41,18 @@ builder.Services.AddAuthentication(options =>
     options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
 });
 
-// Add authorization services
-builder.Services.AddAuthorization();
+// Add authorization services and define policies
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("EducatorOnly", policy =>
+        policy.RequireAssertion(context =>
+        {
+            var user = context.User;
+            // Check for the "UserType" claim with value "Educator"
+            return user.Identity?.IsAuthenticated == true && 
+                  user.HasClaim(c => c.Type == "UserType" && c.Value == "Educator");
+        }));
+});
 
 var app = builder.Build();
 
