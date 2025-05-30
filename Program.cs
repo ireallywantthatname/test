@@ -54,6 +54,15 @@ builder.Services.AddAuthorization(options =>
         }));
 });
 
+// Configure cookie policy for authorization
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.AccessDeniedPath = "/access-denied";
+    
+    // This will still redirect unauthenticated users to the login page
+    options.LoginPath = "/login";
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
