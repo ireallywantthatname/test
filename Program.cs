@@ -61,6 +61,11 @@ builder.Services.ConfigureApplicationCookie(options =>
     
     // This will still redirect unauthenticated users to the login page
     options.LoginPath = "/login";
+
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+    options.SlidingExpiration = true;
 });
 
 var app = builder.Build();
