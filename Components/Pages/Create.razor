@@ -1,7 +1,12 @@
 ﻿@page "/create"
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
 @attribute [Authorize(Policy = "EducatorOnly")]
+@inject UserManager<IdentityUser> UserManager
+@inject IHttpContextAccessor HttpContextAccessor
+@inject ILogger<Create> Logger
 
 <PageTitle>Create | Test</PageTitle>
 
@@ -87,35 +92,60 @@
     private Quiz paper = new();
     private List<Question> questions = new();
     private Dictionary<Question, List<Answer>> questionAnswers = new();
+    private int? currentEducatorId;
 
-    private void AddQuestion()
+    protected override async Task OnInitializedAsync()
     {
-        var question = new Question();
-        questions.Add(question);
-        questionAnswers[question] = new List<Answer>();
-        AddAnswer(question);
+        await GetCurrentEducatorId();
     }
 
-    private void RemoveQuestion(Question question)
+    private async Task GetCurrentEducatorId()
     {
-        questions.Remove(question);
-        questionAnswers.Remove(question);
-    }
-
-    private void AddAnswer(Question question)
-    {
-        questionAnswers[question].Add(new Answer());
-    }
-
-    private void RemoveAnswer(Question question, Answer answer)
-    {
-        questionAnswers[question].Remove(answer);
+        try {
+            // Get the current user
+            var user = await UserManager.GetUserAsync(HttpContextAccessor.HttpContext!.User);
+            
+            if (user != null)
+            {
+                // Find the corresponding Educator entity using the username
+                var educator = await DbContext.Educators.FirstOrDefaultAsync(e => e.Username == user.UserName);
+                
+                if (educator != null)
+                {
+                    currentEducatorId = educator.EducatorID;
+                }
+                else
+                {
+                    // Handle case where there's no matching educator in the custom table
+                    Logger.LogError("No matching educator found in Educators table");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error getting current educator ID: {Message}", ex.Message);
+        }
     }
 
     private async Task SavePaper()
     {
         try
         {
+            if (currentEducatorId == null)
+            {
+                await GetCurrentEducatorId();
+                
+                if (currentEducatorId == null)
+                {
+                    // Still no educator ID, cannot save
+                    Logger.LogError("Cannot save quiz: No educator ID found");
+                    return;
+                }
+            }
+
+            // Set the educator ID before saving
+            paper.EducatorID = currentEducatorId.Value;
+            
             DbContext.Quizzes.Add(paper);
             await DbContext.SaveChangesAsync();
 
@@ -140,7 +170,31 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error saving paper: {ex.Message}");
+            Logger.LogError(ex, "Error saving paper: {Message}", ex.Message);
         }
+    }
+
+    private void AddQuestion()
+    {
+        var question = new Question();
+        questions.Add(question);
+        questionAnswers[question] = new List<Answer>();
+        AddAnswer(question);
+    }
+
+    private void RemoveQuestion(Question question)
+    {
+        questions.Remove(question);
+        questionAnswers.Remove(question);
+    }
+
+    private void AddAnswer(Question question)
+    {
+        questionAnswers[question].Add(new Answer());
+    }
+
+    private void RemoveAnswer(Question question, Answer answer)
+    {
+        questionAnswers[question].Remove(answer);
     }
 }
