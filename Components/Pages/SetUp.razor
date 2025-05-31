@@ -1,6 +1,7 @@
 @page "/"
 @rendermode InteractiveServer
 @using Test.Types
+@using Microsoft.AspNetCore.WebUtilities
 
 @if (!IsStarted)
 {
@@ -54,5 +55,12 @@ else
             Details = "Register here to create your educator account. This will allow you to design and administer courses, configure assessments, and manage student interactions.",
             EventHandler = () => Navigation.NavigateTo("/register?role=educator")
         });
+
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("started", out var startedParam) &&
+            startedParam == "true")
+        {
+            IsStarted = true;
+        }
     }
 }
