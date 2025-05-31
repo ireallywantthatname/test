@@ -1,51 +1,81 @@
-﻿@page "/create"
+﻿@page "/quiz-create"
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
 @using Microsoft.EntityFrameworkCore
+@using System.ComponentModel.DataAnnotations
 @attribute [Authorize(Policy = "EducatorOnly")]
 @inject UserManager<IdentityUser> UserManager
 @inject IHttpContextAccessor HttpContextAccessor
-@inject ILogger<Create> Logger
+@inject ILogger<QuizCreate> Logger
 
 <PageTitle>Create | Test</PageTitle>
 
-<div class="flex flex-col items-center justify-center min-h-screen p-4 md:min-w-lvw sm:min-w-md">
+<div class="flex flex-col items-center justify-center min-h-screen p-4">
     <h1 class="text-3xl font-bold mb-4">Create</h1>
     <hr class="w-48 h-0.5 mx-auto bg-slate-900 rounded-sm mb-8">
+
+    @if (summaryErrors.Any() && showValidationErrors)
+    {
+        <div class="w-full max-w-md bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            @foreach (var error in summaryErrors)
+            {
+                <p class="text-sm">@error</p>
+            }
+        </div>
+    }
 
     <div class="w-full max-w-md">
         <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
             <input @bind="paper.QuizName"
                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
+            @if (string.IsNullOrWhiteSpace(paper.QuizName) && showValidationErrors)
+            {
+                <p class="text-red-600 text-sm">Quiz title is required</p>
+            }
         </div>
         <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
             <textarea @bind="paper.QuizDescription" rows="3"
                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"></textarea>
+            @if (string.IsNullOrWhiteSpace(paper.QuizDescription) && showValidationErrors)
+            {
+                <p class="text-red-600 text-sm">Quiz description is required</p>
+            }
         </div>
     </div>
 
-    <div class="mb-6 md:max-w-lvw sm:max-w-md">
-        @* <h2 class="text-2xl font-bold mb-4 text-center">Questions</h2> *@
-        <div class="grid md:grid-cols-3 sm:grid-cols-1 gap-4">
+    <div class="mb-6 w-full max-w-7xl">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             @foreach (var question in questions)
             {
-                <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="bg-white p-8 rounded-lg shadow-md min-h-96 w-full">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Question Text</label>
-                        <input @bind="question.QuestionBody"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
+                        <textarea @bind="question.QuestionBody" rows="3"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"></textarea>
+                        @if (string.IsNullOrWhiteSpace(question.QuestionBody) && showValidationErrors)
+                        {
+                            <p class="text-red-600 text-sm">Question text is required</p>
+                        }
                     </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
-                        <select @bind="question.QuestionDifficulty"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
-                            <option value="easy">Easy</option>
-                            <option value="medium">Medium</option>
-                            <option value="hard">Hard</option>
-                        </select>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
+                            <select @bind="question.QuestionDifficulty"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Marks</label>
+                            <input type="number" @bind="question.Score" min="0" step="0.5"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
+                        </div>
                     </div>
                     <div class="mb-4">
                         <h3 class="text-xl font-semibold mb-3">Answers</h3>
@@ -64,6 +94,14 @@
                                     Remove
                                 </button>
                             </div>
+                            @if (string.IsNullOrWhiteSpace(answer.Body) && showValidationErrors)
+                            {
+                                <p class="text-red-600 text-sm">Answer text is required</p>
+                            }
+                        }
+                        @if (!questionAnswers[question].Any(a => a.IsCorrect) && questionAnswers[question].Any() && showValidationErrors)
+                        {
+                            <p class="text-red-600 text-sm">At least one correct answer must be selected</p>
                         }
                         <button @onclick="() => AddAnswer(question)"
                             class="mt-2 px-4 py-2 text-sm bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200">
@@ -77,12 +115,12 @@
                 </div>
             }
             <button @onclick="AddQuestion"
-                class="max-w-md min-h-full px-4 py-2 text-slate-900 border border-s-slate-900 rounded-md hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200 mb-4">
-                Add Question
+                class="min-h-96 w-full px-4 py-2 text-slate-900 border border-slate-900 rounded-md hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200 mb-4 flex items-center justify-center">
+                <span class="text-lg font-medium">Add Question</span>
             </button>
         </div>
     </div>
-    <button @onclick="SavePaper"
+    <button @onclick="ValidateAndSave"
         class="max-w-md bg-slate-900 text-white py-2 px-4 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200 my-4">
         Save
     </button>
@@ -93,6 +131,9 @@
     private List<Question> questions = new();
     private Dictionary<Question, List<Answer>> questionAnswers = new();
     private int? currentEducatorId;
+    private List<string> errors = new();
+    private List<string> summaryErrors = new();
+    private bool showValidationErrors = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -127,6 +168,95 @@
         }
     }
 
+    private bool ValidateQuiz()
+    {
+        errors.Clear();
+        summaryErrors.Clear();
+
+        // These errors are handled inline, so we collect them but they won't be in the summary
+        if (string.IsNullOrWhiteSpace(paper.QuizName))
+        {
+            errors.Add("Quiz title is required");
+        }
+
+        if (string.IsNullOrWhiteSpace(paper.QuizDescription))
+        {
+            errors.Add("Quiz description is required");
+        }
+
+        // This is a general error that should be in the summary
+        if (questions.Count == 0)
+        {
+            errors.Add("At least one question is required");
+            summaryErrors.Add("At least one question is required");
+            return errors.Count == 0;
+        }
+
+        // For each question, we track if there's a general issue
+        bool hasQuestionError = false;
+        bool hasAnswerError = false;
+        bool hasCorrectAnswerError = false;
+
+        foreach (var question in questions)
+        {
+            if (string.IsNullOrWhiteSpace(question.QuestionBody))
+            {
+                errors.Add("All questions must have text");
+                hasQuestionError = true;
+            }
+
+            var answers = questionAnswers[question];
+            if (!answers.Any())
+            {
+                errors.Add("Each question must have at least one answer");
+                summaryErrors.Add("Each question must have at least one answer");
+            }
+            else
+            {
+                if (answers.Any(a => string.IsNullOrWhiteSpace(a.Body)))
+                {
+                    errors.Add("All answers must have text");
+                    hasAnswerError = true;
+                }
+
+                if (!answers.Any(a => a.IsCorrect))
+                {
+                    errors.Add("Each question must have at least one correct answer");
+                    hasCorrectAnswerError = true;
+                }
+            }
+        }
+
+        // Add summary messages for general issues
+        if (hasQuestionError)
+        {
+            summaryErrors.Add("Some questions are missing text");
+        }
+        
+        if (hasAnswerError)
+        {
+            summaryErrors.Add("Some answers are missing text");
+        }
+        
+        if (hasCorrectAnswerError)
+        {
+            summaryErrors.Add("Some questions don't have a correct answer selected");
+        }
+
+        return errors.Count == 0;
+    }
+
+    private async Task ValidateAndSave()
+    {
+        showValidationErrors = true;
+        
+        if (ValidateQuiz())
+        {
+            await SavePaper();
+            showValidationErrors = false;
+        }
+    }
+
     private async Task SavePaper()
     {
         try
@@ -139,6 +269,7 @@
                 {
                     // Still no educator ID, cannot save
                     Logger.LogError("Cannot save quiz: No educator ID found");
+                    summaryErrors.Add("Cannot save quiz: No educator ID found");
                     return;
                 }
             }
@@ -164,13 +295,18 @@
 
             await DbContext.SaveChangesAsync();
 
+            // Clear the form after successful save
             paper = new();
             questions.Clear();
             questionAnswers.Clear();
+            errors.Clear();
+            summaryErrors.Clear();
+            showValidationErrors = false;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error saving paper: {Message}", ex.Message);
+            summaryErrors.Add($"Error saving quiz: {ex.Message}");
         }
     }
 
