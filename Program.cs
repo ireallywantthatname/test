@@ -52,6 +52,13 @@ builder.Services.AddAuthorization(options =>
             return user.Identity?.IsAuthenticated == true && 
                   user.HasClaim(c => c.Type == "UserType" && c.Value == "Educator");
         }));
+    options.AddPolicy("AuthenticatedOnly", policy =>
+        policy.RequireAssertion(context =>
+        {
+            var user = context.User;
+            // Check the user is authenticated
+            return user.Identity?.IsAuthenticated == true;
+        }));
 });
 
 // Configure cookie policy for authorization
@@ -61,7 +68,14 @@ builder.Services.ConfigureApplicationCookie(options =>
     
     // This will still redirect unauthenticated users to the login page
     options.LoginPath = "/login";
+
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+    options.SlidingExpiration = true;
 });
+
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

@@ -14,16 +14,6 @@ namespace Test.Models
         [StringLength(256, MinimumLength = 8)]
         public string QuizDescription { get; set; } = null!;
 
-        public enum Difficulty
-        {
-            easy,
-            medium,
-            hard
-        }
-    
-        [Required]
-        public Difficulty QuizDifficulty { get; set; }
-    
         [ForeignKey("EducatorID")]
         public virtual Educator Educator {get; set;} = null!;
 

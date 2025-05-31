@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Test.Models
@@ -18,6 +19,8 @@ namespace Test.Models
     
         [Required]
         public Difficulty QuestionDifficulty { get; set; }
+
+        public float? Score { get; set; } = 1;
 
         [ForeignKey("Quiz")]
         public int QuizID { get; set; }
