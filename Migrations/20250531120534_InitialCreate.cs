@@ -56,8 +56,8 @@ namespace test.Migrations
                 {
                     EducatorID = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Username = table.Column<string>(type: "TEXT", maxLength: 12, nullable: false),
-                    Password = table.Column<string>(type: "TEXT", maxLength: 24, nullable: false)
+                    Username = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
+                    Password = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -70,8 +70,8 @@ namespace test.Migrations
                 {
                     StudentId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Username = table.Column<string>(type: "TEXT", maxLength: 12, nullable: false),
-                    Password = table.Column<string>(type: "TEXT", maxLength: 24, nullable: false)
+                    Username = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
+                    Password = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -192,7 +192,6 @@ namespace test.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     QuizName = table.Column<string>(type: "TEXT", maxLength: 48, nullable: false),
                     QuizDescription = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
-                    QuizDifficulty = table.Column<int>(type: "INTEGER", nullable: false),
                     EducatorID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -238,6 +237,7 @@ namespace test.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     QuestionBody = table.Column<string>(type: "TEXT", nullable: false),
                     QuestionDifficulty = table.Column<int>(type: "INTEGER", nullable: false),
+                    Score = table.Column<float>(type: "REAL", nullable: true),
                     QuizID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -280,75 +280,30 @@ namespace test.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "QuestionParts",
-                columns: table => new
-                {
-                    QuestionPartID = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    QuestionID = table.Column<int>(type: "INTEGER", nullable: false),
-                    Body = table.Column<string>(type: "TEXT", maxLength: 192, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_QuestionParts", x => x.QuestionPartID);
-                    table.ForeignKey(
-                        name: "FK_QuestionParts_Questions_QuestionID",
-                        column: x => x.QuestionID,
-                        principalTable: "Questions",
-                        principalColumn: "QuestionID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Answers",
                 columns: table => new
                 {
                     AnswerID = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    AttemptID = table.Column<int>(type: "INTEGER", nullable: false),
                     QuestionID = table.Column<int>(type: "INTEGER", nullable: false),
-                    QuestionPartID = table.Column<int>(type: "INTEGER", nullable: false),
                     Body = table.Column<string>(type: "TEXT", maxLength: 192, nullable: false),
-                    Score = table.Column<float>(type: "REAL", nullable: false),
                     IsCorrect = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Answers", x => x.AnswerID);
                     table.ForeignKey(
-                        name: "FK_Answers_QuestionParts_QuestionPartID",
-                        column: x => x.QuestionPartID,
-                        principalTable: "QuestionParts",
-                        principalColumn: "QuestionPartID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_Answers_Questions_QuestionID",
                         column: x => x.QuestionID,
                         principalTable: "Questions",
                         principalColumn: "QuestionID",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Answers_QuizAttempts_AttemptID",
-                        column: x => x.AttemptID,
-                        principalTable: "QuizAttempts",
-                        principalColumn: "AttemptID",
-                        onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Answers_AttemptID",
-                table: "Answers",
-                column: "AttemptID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Answers_QuestionID",
                 table: "Answers",
                 column: "QuestionID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Answers_QuestionPartID",
-                table: "Answers",
-                column: "QuestionPartID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -386,11 +341,6 @@ namespace test.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_QuestionParts_QuestionID",
-                table: "QuestionParts",
-                column: "QuestionID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Questions_QuizID",
@@ -440,22 +390,19 @@ namespace test.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "QuizAttempts");
+
+            migrationBuilder.DropTable(
                 name: "StudentEducators");
 
             migrationBuilder.DropTable(
-                name: "QuestionParts");
-
-            migrationBuilder.DropTable(
-                name: "QuizAttempts");
+                name: "Questions");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
-                name: "Questions");
 
             migrationBuilder.DropTable(
                 name: "Students");

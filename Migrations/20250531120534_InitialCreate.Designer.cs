@@ -11,7 +11,7 @@ using Test.Models;
 namespace test.Migrations
 {
     [DbContext(typeof(TestDbContext))]
-    [Migration("20250526111310_InitialCreate")]
+    [Migration("20250531120534_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -218,9 +218,6 @@ namespace test.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AttemptID")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Body")
                         .IsRequired()
                         .HasMaxLength(192)
@@ -232,19 +229,9 @@ namespace test.Migrations
                     b.Property<int>("QuestionID")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("QuestionPartID")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<float>("Score")
-                        .HasColumnType("REAL");
-
                     b.HasKey("AnswerID");
 
-                    b.HasIndex("AttemptID");
-
                     b.HasIndex("QuestionID");
-
-                    b.HasIndex("QuestionPartID");
 
                     b.ToTable("Answers");
                 });
@@ -257,12 +244,11 @@ namespace test.Migrations
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasMaxLength(24)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasMaxLength(12)
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.HasKey("EducatorID");
@@ -286,32 +272,14 @@ namespace test.Migrations
                     b.Property<int>("QuizID")
                         .HasColumnType("INTEGER");
 
+                    b.Property<float?>("Score")
+                        .HasColumnType("REAL");
+
                     b.HasKey("QuestionID");
 
                     b.HasIndex("QuizID");
 
                     b.ToTable("Questions");
-                });
-
-            modelBuilder.Entity("Test.Models.QuestionPart", b =>
-                {
-                    b.Property<int>("QuestionPartID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasMaxLength(192)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("QuestionID")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("QuestionPartID");
-
-                    b.HasIndex("QuestionID");
-
-                    b.ToTable("QuestionParts");
                 });
 
             modelBuilder.Entity("Test.Models.Quiz", b =>
@@ -327,9 +295,6 @@ namespace test.Migrations
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("QuizDifficulty")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("QuizName")
                         .IsRequired()
@@ -378,12 +343,11 @@ namespace test.Migrations
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasMaxLength(24)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasMaxLength(12)
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.HasKey("StudentId");
@@ -459,29 +423,13 @@ namespace test.Migrations
 
             modelBuilder.Entity("Test.Models.Answer", b =>
                 {
-                    b.HasOne("Test.Models.QuizAttempt", "QuizAttempt")
-                        .WithMany()
-                        .HasForeignKey("AttemptID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Test.Models.Question", "Question")
                         .WithMany()
                         .HasForeignKey("QuestionID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Test.Models.QuestionPart", "QuestionPart")
-                        .WithMany()
-                        .HasForeignKey("QuestionPartID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Question");
-
-                    b.Navigation("QuestionPart");
-
-                    b.Navigation("QuizAttempt");
                 });
 
             modelBuilder.Entity("Test.Models.Question", b =>
@@ -493,17 +441,6 @@ namespace test.Migrations
                         .IsRequired();
 
                     b.Navigation("Quiz");
-                });
-
-            modelBuilder.Entity("Test.Models.QuestionPart", b =>
-                {
-                    b.HasOne("Test.Models.Question", "Question")
-                        .WithMany()
-                        .HasForeignKey("QuestionID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Question");
                 });
 
             modelBuilder.Entity("Test.Models.Quiz", b =>
