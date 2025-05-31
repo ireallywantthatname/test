@@ -17,11 +17,6 @@ namespace Test.Models
         [ForeignKey("QuestionID")]
         public virtual Question Question { get; set; } = null!;
 
-        public int QuestionPartID { get; set; }
-
-        [ForeignKey("QuestionPartID")]
-        public virtual QuestionPart QuestionPart { get; set; } = null!;
-
         [Required]
         [StringLength(192, MinimumLength = 2)]
         public string Body { get; set; } = null!;

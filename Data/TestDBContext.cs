@@ -26,7 +26,6 @@ namespace Test.Models
         public virtual DbSet<Answer> Answers { get; set; } = null!;
         public virtual DbSet<Student> Students { get; set; } = null!;
         public virtual DbSet<Educator> Educators { get; set; } = null!;
-        public virtual DbSet<QuestionPart> QuestionParts { get; set; } = null!;
         public virtual DbSet<QuizAttempt> QuizAttempts { get; set; } = null!;
         public virtual DbSet<StudentEducator> StudentEducators { get; set; } = null!;
 
