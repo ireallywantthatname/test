@@ -2,6 +2,8 @@
 @rendermode InteractiveServer
 @using Test.Models
 @inject TestDbContext DbContext
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Policy = "AuthenticatedOnly")]
 @using Microsoft.EntityFrameworkCore
 @inject NavigationManager Navigation
 

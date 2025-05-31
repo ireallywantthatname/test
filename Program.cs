@@ -52,6 +52,13 @@ builder.Services.AddAuthorization(options =>
             return user.Identity?.IsAuthenticated == true && 
                   user.HasClaim(c => c.Type == "UserType" && c.Value == "Educator");
         }));
+    options.AddPolicy("AuthenticatedOnly", policy =>
+        policy.RequireAssertion(context =>
+        {
+            var user = context.User;
+            // Check the user is authenticated
+            return user.Identity?.IsAuthenticated == true;
+        }));
 });
 
 // Configure cookie policy for authorization
