@@ -12,116 +12,154 @@
 
 <PageTitle>Create | Test</PageTitle>
 
-<div class="flex flex-col items-center justify-center min-h-screen p-4">
-    <h1 class="text-3xl font-bold mb-4">Create</h1>
-    <hr class="w-48 h-0.5 mx-auto bg-slate-900 rounded-sm mb-8">
-
-    @if (summaryErrors.Any() && showValidationErrors)
-    {
-        <div class="w-full max-w-md bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            @foreach (var error in summaryErrors)
-            {
-                <p class="text-sm">@error</p>
-            }
-        </div>
-    }
-
-    <div class="w-full max-w-md">
-        <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
-            <input @bind="paper.QuizName"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
-            @if (string.IsNullOrWhiteSpace(paper.QuizName) && showValidationErrors)
-            {
-                <p class="text-red-600 text-sm">Quiz title is required</p>
-            }
-        </div>
-        <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-            <textarea @bind="paper.QuizDescription" rows="3"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"></textarea>
-            @if (string.IsNullOrWhiteSpace(paper.QuizDescription) && showValidationErrors)
-            {
-                <p class="text-red-600 text-sm">Quiz description is required</p>
-            }
-        </div>
-    </div>
-
-    <div class="mb-6 w-full max-w-7xl">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            @foreach (var question in questions)
-            {
-                <div class="bg-white p-8 rounded-lg shadow-md min-h-96 w-full">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Question Text</label>
-                        <textarea @bind="question.QuestionBody" rows="3"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"></textarea>
-                        @if (string.IsNullOrWhiteSpace(question.QuestionBody) && showValidationErrors)
-                        {
-                            <p class="text-red-600 text-sm">Question text is required</p>
-                        }
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
-                            <select @bind="question.QuestionDifficulty"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
-                                <option value="easy">Easy</option>
-                                <option value="medium">Medium</option>
-                                <option value="hard">Hard</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Marks</label>
-                            <input type="number" @bind="question.Score" min="0" step="0.5"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <h3 class="text-xl font-semibold mb-3">Answers</h3>
-                        @foreach (var answer in questionAnswers[question])
-                        {
-                            <div class="flex items-center gap-3 mb-2">
-                                <input @bind="answer.Body" placeholder="Answer text"
-                                    class="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
-                                <label class="flex items-center gap-2">
-                                    <input type="checkbox" @bind="answer.IsCorrect"
-                                        class="w-4 h-4 text-slate-600 focus:ring-slate-500 border-gray-300 rounded" />
-                                    <span class="text-sm text-gray-700">Correct</span>
-                                </label>
-                                <button @onclick="() => RemoveAnswer(question, answer)"
-                                    class="px-3 py-1 text-sm text-red-600 hover:text-red-800 focus:outline-none">
-                                    Remove
-                                </button>
-                            </div>
-                            @if (string.IsNullOrWhiteSpace(answer.Body) && showValidationErrors)
-                            {
-                                <p class="text-red-600 text-sm">Answer text is required</p>
-                            }
-                        }
-                        @if (!questionAnswers[question].Any(a => a.IsCorrect) && questionAnswers[question].Any() && showValidationErrors)
-                        {
-                            <p class="text-red-600 text-sm">At least one correct answer must be selected</p>
-                        }
-                        <button @onclick="() => AddAnswer(question)"
-                            class="mt-2 px-4 py-2 text-sm bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200">
-                            Add Answer
-                        </button>
-                    </div>
-                    <button @onclick="() => RemoveQuestion(question)"
-                        class="px-4 py-2 text-sm text-red-600 border border-red-600 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200">
-                        Remove Question
-                    </button>
-                </div>
-            }
-            <button @onclick="AddQuestion"
-                class="min-h-96 w-full px-4 py-2 text-slate-900 border border-slate-900 rounded-md hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200 mb-4 flex items-center justify-center">
-                <span class="text-lg font-medium">Add Question</span>
-            </button>
-        </div>
-    </div>
-    <button @onclick="ValidateAndSave"
-        class="max-w-md bg-slate-900 text-white py-2 px-4 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200 my-4">
-        Save
+<!-- Fixed floating buttons -->
+<div class="fixed top-10 right-10 z-50">
+    <button @onclick="AddQuestion"
+        class="px-4 py-2 bg-slate-950 text-white rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200 shadow-lg">
+        Add Question
     </button>
+</div>
+
+<div class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+    <button @onclick="ValidateAndSave"
+        class="px-4 py-2 bg-slate-950 text-white rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200 font-medium shadow-lg">
+        Save Quiz
+    </button>
+</div>
+
+<div class="min-h-screen flex items-center justify-center">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold m-4">Create</h1>
+            <hr class="w-48 h-0.5 mx-auto bg-slate-900 rounded-sm">
+        </div>
+
+        @if (summaryErrors.Any() && showValidationErrors)
+        {
+            <div class="max-w-2xl mx-auto bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-8">
+                @foreach (var error in summaryErrors)
+                {
+                    <p class="text-sm">@error</p>
+                }
+            </div>
+        }
+
+        <!-- Quiz Details Card -->
+        <div class="bg-white p-6 rounded-lg mb-8 w-md mx-auto">
+            <h2 class="text-xl font-semibold mb-6 text-slate-950 text-center">Quiz Details</h2>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-slate-800 mb-2">Title</label>
+                    <input @bind="paper.QuizName"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md  focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                        placeholder="Enter quiz title" />
+                    @if (string.IsNullOrWhiteSpace(paper.QuizName) && showValidationErrors)
+                    {
+                        <p class="text-red-600 text-sm mt-1">Quiz title is required</p>
+                    }
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea @bind="paper.QuizDescription" rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md  focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                        placeholder="Enter quiz description"></textarea>
+                    @if (string.IsNullOrWhiteSpace(paper.QuizDescription) && showValidationErrors)
+                    {
+                        <p class="text-red-600 text-sm mt-1">Quiz description is required</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Questions Card -->
+        <div class="mb-8">
+            <div class="max-w-6xl text-center p-4 rounded-lg border-2 border-dashed border-slate-300">
+                @if (!questions.Any())
+                {
+                    <p class="text-gray-500">No questions added yet</p>
+                }
+                else
+                {
+                    <div class="grid grid-cols-2 gap-4 place-items-center">
+                        @foreach (var (question, index) in questions.Select((q, i) => (q, i)))
+                        {
+                            <div class="bg-white p-6 rounded-lg w-full max-w-md flex flex-col justify-center">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-medium text-slate-950">@(index + 1)</h3>
+                                    <button @onclick="() => RemoveQuestion(question)"
+                                        class="text-red-600 border border-red-600 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200 py-2 px-4 text-sm">
+                                        Remove
+                                    </button>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Question Text</label>
+                                        <textarea @bind="question.QuestionBody" rows="3"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md  focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                                            placeholder="Enter your question"></textarea>
+                                        @if (string.IsNullOrWhiteSpace(question.QuestionBody) && showValidationErrors)
+                                        {
+                                            <p class="text-red-600 text-sm mt-1">Question text is required</p>
+                                        }
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
+                                            <select @bind="question.QuestionDifficulty"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-md  focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+                                                <option value="easy">Easy</option>
+                                                <option value="medium">Medium</option>
+                                                <option value="hard">Hard</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Marks</label>
+                                            <input type="number" @bind="question.Score" min="0" step="0.5"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-md  focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
+                                        </div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h3 class="text-xl font-semibold mb-3">Answers</h3>
+                                        @foreach (var answer in questionAnswers[question])
+                                        {
+                                            <div class="flex items-center gap-3 mb-2">
+                                                <input @bind="answer.Body" placeholder="Answer text"
+                                                    class="flex-grow px-3 py-2 border border-gray-300 rounded-md  focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" />
+                                                <label class="flex items-center gap-2">
+                                                    <input type="checkbox" @bind="answer.IsCorrect"
+                                                        class="w-4 h-4 text-slate-600 focus:ring-slate-500 border-gray-300 rounded" />
+                                                    <span class="text-sm text-gray-700">Correct</span>
+                                                </label>
+                                                <button @onclick="() => RemoveAnswer(question, answer)"
+                                                    class="px-3 py-1 text-sm text-red-600 border border-red-600 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200">
+                                                    X
+                                                </button>
+                                            </div>
+                                            @if (string.IsNullOrWhiteSpace(answer.Body) && showValidationErrors)
+                                            {
+                                                <p class="text-red-600 text-sm">Answer text is required</p>
+                                            }
+                                        }
+                                        @if (!questionAnswers[question].Any(a => a.IsCorrect) && questionAnswers[question].Any() &&
+                                            showValidationErrors)
+                                        {
+                                            <p class="text-red-600 text-sm">At least one correct answer must be selected</p>
+                                        }
+                                        <button @onclick="() => AddAnswer(question)"
+                                            class="mt-2 px-4 py-2 text-sm bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 </div>
