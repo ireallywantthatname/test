@@ -105,6 +105,13 @@ public partial class QuizEngine
                 .Where(q => q.QuizID == QuizId)
                 .ToListAsync();
 
+            // Randomize question order for students
+            // Don't randomize for educators to maintain consistency in preview mode
+            if (!isEducator)
+            {
+                RandomizeQuestions();
+            }
+
             // Load answers for each question
             foreach (var question in questions)
             {
@@ -124,6 +131,7 @@ public partial class QuizEngine
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Error loading quiz: {Message}", ex.Message);
             Console.WriteLine($"Error loading quiz: {ex.Message}");
         }
         finally
@@ -373,5 +381,17 @@ public partial class QuizEngine
         {
             Logger.LogError(ex, "Error generating or saving feedback: {Message}", ex.Message);
         }
+    }
+
+    private void RandomizeQuestions()
+    {
+        // Create a new random instance with a time-based seed
+        Random random = new Random();
+        
+        // Create a shuffled copy of the questions list
+        List<Question> shuffledQuestions = questions.OrderBy(_ => random.Next()).ToList();
+        
+        // Replace original list with shuffled list
+        questions = shuffledQuestions;
     }
 }
