@@ -76,18 +76,7 @@ public partial class Login
 
                 if (user != null)
                 {
-                    var claims = await UserManager.GetClaimsAsync(user);
-                    var userTypeClaim = claims.FirstOrDefault(c => c.Type == "UserType");
-
-                    if (userTypeClaim?.Value == "Educator")
-                    {
-                        redirectUrl = "/quiz-create";
-                    }
-                    else
-                    {
-                        // Default to home page for students or unknown user types
-                        redirectUrl = "/";
-                    }
+                    redirectUrl = "/dashboard";
 
                     // Use return URL if specified
                     if (!string.IsNullOrEmpty(ReturnUrl))
