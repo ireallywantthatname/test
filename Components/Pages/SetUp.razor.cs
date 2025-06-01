@@ -1,5 +1,6 @@
 using Test.Types;
 namespace test.Components.Pages;
+using Microsoft.AspNetCore.WebUtilities;
 
 public partial class SetUp
 {
@@ -21,5 +22,12 @@ public partial class SetUp
             Details = "Register here to create your educator account. This will allow you to design and administer courses, configure assessments, and manage student interactions.",
             EventHandler = () => Navigation.NavigateTo("/register?role=educator")
         });
+
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("started", out var startedParam) &&
+            startedParam == "true")
+        {
+            IsStarted = true;
+        }
     }
 }
