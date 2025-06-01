@@ -17,7 +17,10 @@
 
 <div class="flex flex-col items-center justify-center min-h-screen p-4">
 
-    <h1 class="text-3xl font-bold mb-4">Available Quizzes</h1>
+    <!-- Update the page title based on user role -->
+    <h1 class="text-3xl font-bold mb-4">
+        @(isEducator ? "Your Created Quizzes" : "Available Quizzes")
+    </h1>
     
     <hr class="w-48 h-0.5 mx-auto bg-slate-900 rounded-sm mb-8">
     @if (!string.IsNullOrEmpty(errorMessage))
@@ -36,8 +39,16 @@
         }
         else if (!quizzes.Any())
         {
+            <!-- When no quizzes exist -->
             <div class="text-center py-8">
-                <p class="text-xl text-gray-600">No quizzes available at the moment</p>
+                @if (isEducator)
+                {
+                    <p class="text-xl text-gray-600">You haven't created any quizzes yet</p>
+                }
+                else
+                {
+                    <p class="text-xl text-gray-600">No quizzes available at the moment</p>
+                }
             </div>
         }
         else
@@ -50,22 +61,36 @@
                     <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
                         <h2 class="text-xl font-bold mb-2">@quiz.QuizName</h2>
                         <p class="text-gray-600 mb-4 line-clamp-2">@quiz.QuizDescription</p>
+                        <!-- Update the quiz display section -->
                         <div class="flex justify-between items-center">
                             <div class="flex flex-col">
                                 <span class="text-sm text-gray-500">
                                     @questionCounts[quiz.QuizId] questions
                                 </span>
-                                <span class="text-sm @(maxAttemptsReached ? "text-red-500 font-medium" : "text-gray-500")">
-                                    @(attempts) / 2 attempts used
-                                </span>
+                                @if (!isEducator)
+                                {
+                                    <span class="text-sm @(maxAttemptsReached ? "text-red-500 font-medium" : "text-gray-500")">
+                                        @(attempts) / 2 attempts used
+                                    </span>
+                                }
+                                @if (isEducator)
+                                {
+                                    <span class="text-sm text-blue-600">
+                                        @(totalQuizAttempts.TryGetValue(quiz.QuizId, out int totalAttempts) ? totalAttempts : 0) total student attempts
+                                    </span>
+                                }
                             </div>
                             
-                            @if (!maxAttemptsReached)
+                            @if (!isEducator && !maxAttemptsReached)
                             {
                                 <button @onclick="() => Start(quiz.QuizId)"
                                     class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2">
                                     Start Quiz
                                 </button>
+                            }
+                            else if (isEducator)
+                            {
+                                <span class="text-sm text-slate-500 italic">Created by you</span>
                             }
                         </div>
                     </div>

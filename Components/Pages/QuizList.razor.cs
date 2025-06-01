@@ -8,9 +8,13 @@ public partial class QuizList
     private List<Quiz> quizzes = new();
     private Dictionary<int, int> questionCounts = new();
     private Dictionary<int, int> quizAttemptCounts = new();
+    private Dictionary<int, int> totalQuizAttempts = new();
     private bool loading = true;
     private int? currentStudentId;
     private string? errorMessage;
+    private string? currentUserName;
+
+    private bool isEducator => !currentStudentId.HasValue;
 
     protected override async Task OnInitializedAsync()
     {
@@ -39,6 +43,9 @@ public partial class QuizList
             
             if (user != null)
             {
+                // Store the username for educator filtering
+                currentUserName = user.UserName;
+                
                 // Find the corresponding Student entity using the username
                 var student = await DbContext.Students.FirstOrDefaultAsync(s => s.Username == user.UserName);
                 
@@ -50,7 +57,7 @@ public partial class QuizList
                 else
                 {
                     // Handle case where there's no matching student in the custom table
-                    Logger.LogError("No matching student found in Students table");
+                    Logger.LogError("Possible Educator; No matching student found in Students table");
                 }
             }
         }
@@ -64,8 +71,44 @@ public partial class QuizList
     {
         try
         {
-            // Load all available quizzes
-            quizzes = await DbContext.Quizzes.ToListAsync();
+            // Load quizzes based on user role
+            if (isEducator)
+            {
+                // For educators, first get the educator ID based on username
+                var educator = await DbContext.Educators.FirstOrDefaultAsync(e => e.Username == currentUserName);
+                
+                if (educator != null)
+                {
+                    // Only show quizzes created by this educator
+                    quizzes = await DbContext.Quizzes
+                        .Where(q => q.EducatorID == educator.EducatorID)
+                        .ToListAsync();
+                    
+                    Logger.LogInformation("Loaded {Count} quizzes created by educator {Username} with ID {EducatorId}", 
+                        quizzes.Count, currentUserName, educator.EducatorID);
+                    
+                    // For each quiz, count the total number of attempts by all students
+                    foreach (var quiz in quizzes)
+                    {
+                        var attemptCount = await DbContext.QuizAttempts
+                            .Where(a => a.QuizID == quiz.QuizId)
+                            .CountAsync();
+                        
+                        totalQuizAttempts[quiz.QuizId] = attemptCount;
+                        Logger.LogInformation("Quiz {QuizId} has {TotalAttemptCount} total attempts", quiz.QuizId, attemptCount);
+                    }
+                }
+                else
+                {
+                    Logger.LogWarning("No educator record found for username {Username}", currentUserName);
+                    quizzes = new List<Quiz>(); // Empty list if no educator found
+                }
+            }
+            else
+            {
+                // For students, show all quizzes
+                quizzes = await DbContext.Quizzes.ToListAsync();
+            }
 
             // Count questions for each quiz
             foreach (var quiz in quizzes)
@@ -84,7 +127,7 @@ public partial class QuizList
                         .CountAsync();
 
                     quizAttemptCounts[quiz.QuizId] = attemptCount;
-                    Logger.LogInformation("Quiz {QuizId} has {AttemptCount} attempts", quiz.QuizId, attemptCount);
+                    Logger.LogInformation("Quiz {QuizId} has {AttemptCount} attempts by current student", quiz.QuizId, attemptCount);
                 }
             }
         }
