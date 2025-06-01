@@ -5,6 +5,7 @@
 @inject ILogger<Logout> Logger
 
 <h3>Logging out...</h3>
+<meta http-equiv="refresh" content="0;url=/" />
 
 @code {
     protected override async Task OnInitializedAsync()
@@ -12,6 +13,5 @@
         Logger.LogInformation("User logout initiated.");
         await SignInManager.SignOutAsync();
         Logger.LogInformation("User successfully logged out.");
-        Navigation.NavigateTo("/");
     }
 }
