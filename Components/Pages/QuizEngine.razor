@@ -1,0 +1,155 @@
+@page "/quiz/{QuizId:int}"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> UserManager
+@inject IHttpContextAccessor HttpContextAccessor
+@inject ILogger<QuizEngine> Logger
+@attribute [StreamRendering]
+@attribute [Authorize(Policy = "AuthenticatedOnly")]
+
+<PageTitle>Quiz | Test</PageTitle>
+
+<div class="flex flex-col items-center justify-center min-h-screen p-4">
+    @if (loading)
+    {
+        <div class="flex items-center justify-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-slate-900"></div>
+        </div>
+    }
+    else if (quiz == null)
+    {
+        <div class="text-center">
+            <h2 class="text-2xl font-bold mb-4">Quiz not found</h2>
+            <button @onclick='() => Navigation.NavigateTo("/quiz-list")' 
+                class="px-4 py-2 bg-slate-900 text-white rounded-md hover:bg-slate-800">
+                Available Quizzes
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="w-full max-w-3xl">
+            <div class="mb-6">
+                <h1 class="text-3xl font-bold">@quiz.QuizName</h1>
+                <p class="text-gray-600 mt-2">@quiz.QuizDescription</p>
+                <hr class="my-4 border-slate-300">
+            </div>
+
+            @if (!quizSubmitted)
+            {
+                <div class="space-y-8">
+                    @if (currentQuestionIndex < questions.Count)
+                    {
+                        var question = questions[currentQuestionIndex];
+                        
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-semibold">@(currentQuestionIndex + 1). @question.QuestionBody</h3>
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold @(timeLeft <= 5 ? "text-red-600" : "text-slate-700")">
+                                        @timeLeft
+                                    </div>
+                                    <div class="text-xs text-gray-500">seconds left</div>
+                                </div>
+                            </div>
+                            <div class="ml-4 space-y-2">
+                                @foreach (var answer in questionAnswers[question])
+                                {
+                                    <div class="flex items-center">
+                                        <input type="radio" 
+                                               id="@($"q{currentQuestionIndex}-a{answer.AnswerID}")" 
+                                               name="@($"question-{currentQuestionIndex}")" 
+                                               value="@answer.AnswerID"
+                                               checked="@(selectedAnswers.ContainsKey(question.QuestionID) && selectedAnswers[question.QuestionID] == answer.AnswerID)"
+                                               @onchange="() => SelectAnswer(question.QuestionID, answer.AnswerID)" 
+                                               class="w-4 h-4 text-slate-600 focus:ring-slate-500 border-gray-300" />
+                                        <label for="@($"q{currentQuestionIndex}-a{answer.AnswerID}")" class="ml-2 text-sm text-gray-700">@answer.Body</label>
+                                    </div>
+                                }
+                            </div>
+                            <div class="mt-2 text-sm text-gray-500">
+                                Difficulty: @question.QuestionDifficulty | Points: @question.Score
+                            </div>
+                            
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-4">
+                                <div class="bg-slate-600 h-2.5 rounded-full" style="width: @(100 - ((double)timeLeft / GetQuestionTimeLimit(question) * 100))%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between mt-4">
+                            <div class="text-gray-600">
+                                Question @(currentQuestionIndex + 1) of @questions.Count
+                            </div>
+                            <div class="text-gray-600">
+                                Advancing automatically when time expires
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center p-8">
+                            <h2 class="text-2xl font-bold mb-6">Ready to submit?</h2>
+                            <p class="mb-6">You've answered @selectedAnswers.Count out of @questions.Count questions.</p>
+                            <div class="flex flex-col items-center gap-3">
+                                <button @onclick="SubmitQuiz" 
+                                    class="px-6 py-2 bg-slate-900 text-white rounded-md hover:bg-slate-800">
+                                    Submit Quiz Now
+                                </button>
+                                <p class="text-sm text-gray-600">Quiz will be automatically submitted in a moment...</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-4">Quiz Results</h2>
+                    <p class="text-lg">You scored: <span class="font-bold">@score</span> out of <span class="font-bold">@totalPossibleScore</span></p>
+                    <p class="text-lg mb-4">Percentage: <span class="font-bold">@(Math.Round((score / totalPossibleScore) * 100, 2))%</span></p>
+
+                    <div class="mt-6 space-y-6">
+                        @for (int i = 0; i < questions.Count; i++)
+                        {
+                            var question = questions[i];
+                            var userAnswerId = selectedAnswers.ContainsKey(question.QuestionID) ? selectedAnswers[question.QuestionID] : 0;
+                            var correctAnswer = questionAnswers[question].FirstOrDefault(a => a.IsCorrect);
+                            var isCorrect = correctAnswer != null && userAnswerId == correctAnswer.AnswerID;
+
+                            <div class="border-l-4 @(isCorrect ? "border-green-500" : "border-red-500") pl-4 py-2">
+                                <h3 class="text-lg font-semibold">@(i + 1). @question.QuestionBody</h3>
+                                <div class="mt-2">
+                                    @if (userAnswerId > 0)
+                                    {
+                                        var userAnswer = questionAnswers[question].FirstOrDefault(a => a.AnswerID == userAnswerId);
+                                        <p>Your answer: <span class="@(isCorrect ? "text-green-600 font-medium" : "text-red-600 font-medium")">
+                                            @(userAnswer?.Body ?? "No answer")
+                                        </span></p>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-red-600">You didn't answer this question</p>
+                                    }
+
+                                    @if (!isCorrect && correctAnswer != null)
+                                    {
+                                        <p class="text-green-600 mt-1">Correct answer: @correctAnswer.Body</p>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mt-8">
+                        <button @onclick='() => Navigation.NavigateTo("/quiz-list")'
+                            class="px-4 py-2 bg-slate-900 text-white rounded-md hover:bg-slate-800">
+                            Available Quizzes
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
