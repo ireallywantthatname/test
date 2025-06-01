@@ -37,6 +37,14 @@
                 <hr class="my-4 border-slate-300">
             </div>
 
+            @if (isEducator)
+            {
+                <div class="w-full mb-6 bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+                    <p class="font-medium">Educator Preview Mode</p>
+                    <p class="text-sm">You're viewing this quiz as an educator. You can test the quiz functionality, but your answers won't be recorded or count toward statistics.</p>
+                </div>
+            }
+
             @if (!quizSubmitted)
             {
                 <div class="space-y-8">

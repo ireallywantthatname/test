@@ -23,12 +23,15 @@ public partial class QuizEngine
     private int timeLeft = 0;
     private System.Threading.Timer? timer;
 
+    // Add this property to check if user is an educator
+    private bool isEducator => !currentStudentId.HasValue;
+
     protected override async Task OnInitializedAsync()
     {
         await GetCurrentStudentId();
 
-        // Check if the student has already reached max attempts before loading the quiz
-        if (await HasReachedMaxAttempts())
+        // Only check max attempts for students, not educators
+        if (!isEducator && await HasReachedMaxAttempts())
         {
             // Redirect to quiz list with an error message
             Navigation.NavigateTo("/quiz-list?error=maxattempts");
@@ -219,19 +222,22 @@ public partial class QuizEngine
             }
         }
 
-        // Create quiz attempt record in database
+        // Skip database operations for educators
+        if (isEducator)
+        {
+            Logger.LogInformation("Educator preview completed - no attempt recorded");
+            quizSubmitted = true;
+            return;
+        }
+
+        // Create quiz attempt record in database for students
         try
         {
             if (currentStudentId == null)
             {
-                await GetCurrentStudentId();
-
-                if (currentStudentId == null)
-                {
-                    // Still no student ID, use a fallback approach or show an error
-                    Logger.LogError("Cannot save quiz attempt: No student ID found");
-                    return;
-                }
+                // This shouldn't happen as we already checked isEducator
+                Logger.LogError("Cannot save quiz attempt: No student ID found");
+                return;
             }
 
             var attempt = new QuizAttempt

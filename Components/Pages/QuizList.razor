@@ -81,6 +81,7 @@
                                 }
                             </div>
                             
+                            <!-- Update the quiz display section for educators -->
                             @if (!isEducator && !maxAttemptsReached)
                             {
                                 <button @onclick="() => Start(quiz.QuizId)"
@@ -90,7 +91,13 @@
                             }
                             else if (isEducator)
                             {
-                                <span class="text-sm text-slate-500 italic">Created by you</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm text-slate-500 italic">Created by you</span>
+                                    <button @onclick="() => Preview(quiz.QuizId)"
+                                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                        Preview
+                                    </button>
+                                </div>
                             }
                         </div>
                     </div>

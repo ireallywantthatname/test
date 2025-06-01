@@ -141,11 +141,20 @@ public partial class QuizList
         }
     }
 
+    private void Preview(int quizId)
+    {
+        // Use the same navigation as Start, but the QuizEngine will handle it differently for educators
+        Navigation.NavigateTo($"/quiz/{quizId}");
+    }
+
     private void Start(int quizId)
     {
+        // Don't navigate if max attempts reached
         if (quizAttemptCounts.TryGetValue(quizId, out int attempts) && attempts >= 2)
         {
-            return; // Don't navigate if max attempts reached
+            // Display an error or notification to the user
+            errorMessage = "You have already reached the maximum number of attempts allowed for this quiz.";
+            return;
         }
         
         Navigation.NavigateTo($"/quiz/{quizId}");
