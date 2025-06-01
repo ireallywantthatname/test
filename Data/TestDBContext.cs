@@ -28,6 +28,7 @@ namespace Test.Models
         public virtual DbSet<Educator> Educators { get; set; } = null!;
         public virtual DbSet<QuizAttempt> QuizAttempts { get; set; } = null!;
         public virtual DbSet<StudentEducator> StudentEducators { get; set; } = null!;
+        public virtual DbSet<QuizFeedback> QuizFeedbacks { get; set; } = null!;
 
         // to handle many-to-many relationship
         protected override void OnModelCreating(ModelBuilder modelBuilder)
