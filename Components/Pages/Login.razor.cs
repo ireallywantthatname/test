@@ -27,8 +27,19 @@ public partial class Login
     private bool shouldRedirect = false;
     private string redirectUrl = string.Empty;
 
-    protected override void OnInitialized()
+    protected override Task OnInitializedAsync()
     {
+        // Check if user is already authenticated using HttpContextAccessor
+        var isAuthenticated = HttpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated == true;
+
+        if (isAuthenticated)
+        {
+            // User is already logged in, redirect to home
+            Logger.LogInformation("Already authenticated user attempted to access login page");
+            Navigation.NavigateTo("/");
+            return Task.CompletedTask;
+        }
+
         // Handle error messages from query parameters
         if (!string.IsNullOrEmpty(Error))
         {
@@ -51,6 +62,8 @@ public partial class Login
                     break;
             }
         }
+
+        return Task.CompletedTask;
     }
 
     private async Task HandleLogin()
