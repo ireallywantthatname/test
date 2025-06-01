@@ -117,7 +117,7 @@ public partial class Dashboard
                     .Where(qa => qa.StudentID == student.StudentId)
                     .Include(qa => qa.Quiz)
                     .OrderByDescending(qa => qa.AttemptID)
-                    .Take(5)
+                    .Take(2)
                     .ToListAsync();
 
                 totalAttempts = recentAttempts.Count;
