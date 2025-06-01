@@ -332,6 +332,43 @@ namespace test.Migrations
                     b.ToTable("QuizAttempts");
                 });
 
+            modelBuilder.Entity("Test.Models.QuizFeedback", b =>
+                {
+                    b.Property<int>("FeedbackId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AttemptID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FeedbackText")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("QuizDescription")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("QuizName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<float>("Score")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("TotalPossibleScore")
+                        .HasColumnType("REAL");
+
+                    b.HasKey("FeedbackId");
+
+                    b.HasIndex("AttemptID");
+
+                    b.ToTable("QuizFeedbacks");
+                });
+
             modelBuilder.Entity("Test.Models.Student", b =>
                 {
                     b.Property<int>("StudentId")
@@ -468,6 +505,17 @@ namespace test.Migrations
                     b.Navigation("Quiz");
 
                     b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("Test.Models.QuizFeedback", b =>
+                {
+                    b.HasOne("Test.Models.QuizAttempt", "QuizAttempt")
+                        .WithMany()
+                        .HasForeignKey("AttemptID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("QuizAttempt");
                 });
 
             modelBuilder.Entity("Test.Models.StudentEducator", b =>

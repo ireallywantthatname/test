@@ -300,6 +300,31 @@ namespace test.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "QuizFeedbacks",
+                columns: table => new
+                {
+                    FeedbackId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    AttemptID = table.Column<int>(type: "INTEGER", nullable: false),
+                    QuizName = table.Column<string>(type: "TEXT", nullable: false),
+                    QuizDescription = table.Column<string>(type: "TEXT", nullable: false),
+                    Score = table.Column<float>(type: "REAL", nullable: false),
+                    TotalPossibleScore = table.Column<float>(type: "REAL", nullable: false),
+                    FeedbackText = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuizFeedbacks", x => x.FeedbackId);
+                    table.ForeignKey(
+                        name: "FK_QuizFeedbacks_QuizAttempts_AttemptID",
+                        column: x => x.AttemptID,
+                        principalTable: "QuizAttempts",
+                        principalColumn: "AttemptID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Answers_QuestionID",
                 table: "Answers",
@@ -358,6 +383,11 @@ namespace test.Migrations
                 column: "StudentID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_QuizFeedbacks_AttemptID",
+                table: "QuizFeedbacks",
+                column: "AttemptID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Quizzes_EducatorID",
                 table: "Quizzes",
                 column: "EducatorID");
@@ -390,7 +420,7 @@ namespace test.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "QuizAttempts");
+                name: "QuizFeedbacks");
 
             migrationBuilder.DropTable(
                 name: "StudentEducators");
@@ -405,10 +435,13 @@ namespace test.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Students");
+                name: "QuizAttempts");
 
             migrationBuilder.DropTable(
                 name: "Quizzes");
+
+            migrationBuilder.DropTable(
+                name: "Students");
 
             migrationBuilder.DropTable(
                 name: "Educators");
