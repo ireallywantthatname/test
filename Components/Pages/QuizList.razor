@@ -17,15 +17,14 @@
 
 <div class="flex flex-col items-center justify-center min-h-screen p-4">
 
-    <!-- Update the page title based on user role -->
     <h1 class="text-3xl font-bold mb-4">
-        @(isEducator ? "Your Created Quizzes" : "Available Quizzes")
+        @(isEducator ? "Quizzes you created" : "Quizzes available for you")
     </h1>
-    
-    <hr class="w-48 h-0.5 mx-auto bg-slate-900 rounded-sm mb-8">
+
+    <hr class="w-48 h-0.5 mx-auto bg-slate-950 rounded-sm mb-8">
     @if (!string.IsNullOrEmpty(errorMessage))
     {
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-6 max-w-3xl w-full text-center">
+        <div class="bg-red-50 border text-red-700 px-4 py-2 rounded mb-6 max-w-3xl w-md text-center">
             <span class="">@errorMessage</span>
         </div>
     }
@@ -40,61 +39,67 @@
         else if (!quizzes.Any())
         {
             <!-- When no quizzes exist -->
-            <div class="text-center py-8">
+            <div class="mx-auto w-md text-center p-4 rounded-lg border-2 border-dashed border-slate-300">
                 @if (isEducator)
                 {
-                    <p class="text-xl text-gray-600">You haven't created any quizzes yet</p>
+                    <p class="text-xl text-slate-600">You haven't created any quizzes yet</p>
                 }
                 else
                 {
-                    <p class="text-xl text-gray-600">No quizzes available at the moment</p>
+                    <p class="text-xl text-slate-600">No quizzes available at the moment</p>
                 }
+                <svg class="text-slate-200 h-20 w-20 mx-auto mt-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                    fill="currentColor">
+                    <path
+                        d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM7 17H9C9 15.3431 10.3431 14 12 14C13.6569 14 15 15.3431 15 17H17C17 14.2386 14.7614 12 12 12C9.23858 12 7 14.2386 7 17ZM8 11C8.82843 11 9.5 10.3284 9.5 9.5C9.5 8.67157 8.82843 8 8 8C7.17157 8 6.5 8.67157 6.5 9.5C6.5 10.3284 7.17157 11 8 11ZM16 11C16.8284 11 17.5 10.3284 17.5 9.5C17.5 8.67157 16.8284 8 16 8C15.1716 8 14.5 8.67157 14.5 9.5C14.5 10.3284 15.1716 11 16 11Z">
+                    </path>
+                </svg>
             </div>
         }
         else
         {
-            <div class="grid gap-6 md:grid-cols-2">
+            <div class="grid gap-4 @(quizzes.Count() == 1 ? "grid-cols-1 justify-items-center" : "grid-cols-2")">
                 @foreach (var quiz in quizzes)
                 {
                     bool maxAttemptsReached = quizAttemptCounts.TryGetValue(quiz.QuizId, out int attempts) && attempts >= 2;
-                    
-                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+
+                    <div class="bg-white p-6 rounded-lg max-w-md">
                         <h2 class="text-xl font-bold mb-2">@quiz.QuizName</h2>
-                        <p class="text-gray-600 mb-4 line-clamp-2">@quiz.QuizDescription</p>
+                        <p class="text-slate-600 mb-4 line-clamp-2">@quiz.QuizDescription</p>
                         <!-- Update the quiz display section -->
                         <div class="flex justify-between items-center">
                             <div class="flex flex-col">
-                                <span class="text-sm text-gray-500">
+                                <span class="ext-sm text-slate-500">
                                     @questionCounts[quiz.QuizId] questions
                                 </span>
                                 @if (!isEducator)
                                 {
-                                    <span class="text-sm @(maxAttemptsReached ? "text-red-500 font-medium" : "text-gray-500")">
+                                    <span class="text-sm @(maxAttemptsReached ? "text-red-600 font-medium" : "text-slate-500")">
                                         @(attempts) / 2 attempts used
                                     </span>
                                 }
                                 @if (isEducator)
                                 {
-                                    <span class="text-sm text-blue-600">
-                                        @(totalQuizAttempts.TryGetValue(quiz.QuizId, out int totalAttempts) ? totalAttempts : 0) total student attempts
+                                    <span class="text-sm text-slate-500">
+                                        @(totalQuizAttempts.TryGetValue(quiz.QuizId, out int totalAttempts) ? totalAttempts : 0)
+                                        total student attempts
                                     </span>
                                 }
                             </div>
-                            
+
                             <!-- Update the quiz display section for educators -->
                             @if (!isEducator && !maxAttemptsReached)
                             {
                                 <button @onclick="() => Start(quiz.QuizId)"
-                                    class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2">
-                                    Start Quiz
+                                    class="px-4 py-2 bg-slate-950 text-white rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200">
+                                    Start
                                 </button>
                             }
                             else if (isEducator)
                             {
                                 <div class="flex items-center gap-2">
-                                    <span class="text-sm text-slate-500 italic">Created by you</span>
                                     <button @onclick="() => Preview(quiz.QuizId)"
-                                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                        class="px-4 py-2 bg-slate-950 text-white rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200">
                                         Preview
                                     </button>
                                 </div>
