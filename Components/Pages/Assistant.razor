@@ -48,15 +48,13 @@
     else
     {
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold mb-4">
-                Previous Feedbacks
-            </h1>
-            <hr class="w-48 h-0.5 mx-auto bg-slate-950 rounded-sm mb-8">
+            <h1 class="text-3xl font-bold m-2">Previous feedbacks</h1>
+            <hr class="w-48 h-0.5 mx-auto bg-slate-950 rounded-sm">
         </div>
-        <div class="grid grid-cols-1 gap-6 max-w-3xl mx-auto">
+        <div class="grid grid-cols-1 gap-6 mx-auto">
             @foreach (var feedback in feedbacks)
             {
-                <div class="bg-white rounded-lg overflow-hidden w-lg">
+                <div class="bg-white rounded-lg overflow-hidden w-3xl">
                     <div class="px-4 py-3">
                         <div class="flex justify-between items-center">
                             <h2 class="text-xl font-semibold">@feedback.QuizName</h2>
