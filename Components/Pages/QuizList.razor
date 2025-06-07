@@ -15,10 +15,10 @@
 
 <PageTitle>Available Quizzes | Test</PageTitle>
 
-<div class="flex flex-col items-center justify-center min-h-screen p-4">
+<div class="flex flex-col items-center justify-center min-h-screen p-12">
     <div class="text-center mb-8">
         <h1 class="text-3xl font-bold m-2">
-            @(isEducator ? "Quizzes you created" : "Quizzes available for you")
+            @(isEducator ? "Quizzes you created" : "Available quizzes")
         </h1>
         <hr class="w-48 h-0.5 mx-auto bg-slate-950 rounded-sm">
     </div>
@@ -39,7 +39,7 @@
         else if (!quizzes.Any())
         {
             <!-- When no quizzes exist -->
-            <div class="mx-auto w-md text-center p-4 rounded-lg border-2 border-dashed border-slate-300">
+            <div class="mx-auto w-sm md:w-md sm:w-sm text-center p-4 rounded-lg border-2 border-dashed border-slate-300">
                 @if (isEducator)
                 {
                     <p class="text-xl text-slate-600">You haven't created any quizzes yet</p>
@@ -58,18 +58,18 @@
         }
         else
         {
-            <div class="grid gap-4 @(quizzes.Count() == 1 ? "grid-cols-1 justify-items-center" : "grid-cols-2")">
+            <div class="grid gap-4 @(quizzes.Count() == 1 ? "grid-cols-1 justify-items-center" : "grid-cols-1 md:grid-cols-2 sm:grid-cols-1")">
                 @foreach (var quiz in quizzes)
                 {
                     bool maxAttemptsReached = quizAttemptCounts.TryGetValue(quiz.QuizId, out int attempts) && attempts >= 2;
 
-                    <div class="bg-white p-6 rounded-lg w-md">
+                    <div class="bg-white p-6 rounded-lg w-sm md:w-md sm:w-sm mx-auto">
                         <h2 class="text-xl font-bold mb-2">@quiz.QuizName</h2>
                         <p class="text-slate-600 mb-4 line-clamp-2">@quiz.QuizDescription</p>
                         <!-- Update the quiz display section -->
                         <div class="flex justify-between items-center">
                             <div class="flex flex-col">
-                                <span class="ext-sm text-slate-500">
+                                <span class="text-slate-500">
                                     @questionCounts[quiz.QuizId] questions
                                 </span>
                                 @if (!isEducator)

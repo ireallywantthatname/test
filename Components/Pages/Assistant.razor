@@ -12,7 +12,7 @@
 
 <PageTitle>AI Assistant Feedback History</PageTitle>
 
-<div class="flex flex-col items-center justify-center min-h-screen p-4">
+<div class="flex flex-col items-center justify-center min-h-screen p-12">
 
     @if (loading)
     {
@@ -22,7 +22,7 @@
     }
     else if (isEducator)
     {
-        <div class="flex justify-center items-center w-md">
+        <div class="flex justify-center items-center w-sm sm:w-sm md:w-md">
             <div class="text-red-700 border-2 border-dashed border-red-300 p-5 rounded-lg text-center w-md">
                 <h2 class="text-lg font-semibold mb-2">Not Available</h2>
                 <p class="text-base mb-2">This feature is only available for students.</p>
@@ -32,7 +32,7 @@
     }
     else if (feedbacks.Count == 0)
     {
-        <div class="text-center py-8 border-2 border-dashed border-slate-300 rounded-lg w-md">
+        <div class="text-center py-8 border-2 border-dashed border-slate-300 rounded-lg w-sm sm:w-sm md:w-md">
             <h1 class="text-lg font-semibold mb-2">No Feedback Yet</h1>
             <div class="max-w-md mx-auto">
                 <p class="text-lg text-slate-600 mb-2"></p>
@@ -54,7 +54,7 @@
         <div class="grid grid-cols-1 gap-6 mx-auto">
             @foreach (var feedback in feedbacks)
             {
-                <div class="bg-white rounded-lg overflow-hidden w-3xl">
+                <div class="bg-white rounded-lg overflow-hidden w-sm sm:w-sm md:w-3xl">
                     <div class="px-4 py-3">
                         <div class="flex justify-between items-center">
                             <h2 class="text-xl font-semibold">@feedback.QuizName</h2>

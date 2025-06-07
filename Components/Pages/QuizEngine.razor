@@ -11,7 +11,7 @@
 
 <PageTitle>Quiz | Test</PageTitle>
 
-<div class="flex flex-col items-center justify-center min-h-screen p-4">
+<div class="flex flex-col items-center justify-center min-h-screen p-12">
     @if (loading)
     {
         <div class="flex items-center justify-center">
@@ -31,19 +31,22 @@
     else
     {
         <div>
-            <div class="mb-6">
-                <h1 class="text-3xl font-bold text-center">@quiz.QuizName</h1>
-                <p class="text-slate-600 mt-2 text-center">@quiz.QuizDescription</p>
-            </div>
-
             @if (isEducator)
             {
-                <div class="fixed top-10 right-10 z-50 w-md bg-slate-200 border border-slate-400 text-slate-700 px-4 py-3 rounded text-right">
+                <div class="md:fixed md:top-10 md:right-10 md:z-50 w-sm sm:w-sm md:w-md bg-slate-200 text-slate-700 px-4 py-3 rounded text-center sm:text-center md:text-right m-4 sm:m-4 md:m-0">
                     <p class="font-medium">Educator Preview Mode</p>
-                    <p class="text-sm">You're viewing this quiz as an educator. You can test the quiz functionality, but your
+                    <p class="hidden sm:hidden md:block text-sm">You're viewing this quiz as an educator. You can test the quiz functionality, but your
                         answers won't be recorded or count toward statistics.</p>
                 </div>
             }
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold m-2">
+                    @quiz.QuizName
+                </h1>
+                <hr class="w-48 h-0.5 mx-auto bg-slate-950 rounded-sm">
+                <p class="text-slate-600 mt-2 text-center">@quiz.QuizDescription</p>
+            </div>
+
 
             @if (!quizSubmitted)
             {
@@ -52,9 +55,9 @@
                     {
                         var question = questions[currentQuestionIndex];
 
-                        <div class="w-2xl bg-white p-6 rounded-lg">
+                        <div class="w-sm md:w-2xl sm:w-sm bg-white p-6 rounded-lg mx-auto">
                             <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-xl font-semibold">@(currentQuestionIndex + 1). @question.QuestionBody</h3>
+                                <h3 class="text-md font-semibold">@(currentQuestionIndex + 1). @question.QuestionBody</h3>
                                 <div class="text-right">
                                     <div class="text-2xl font-bold @(timeLeft <= 5 ? "text-red-600" : "text-slate-700")">
                                         @timeLeft
@@ -76,19 +79,19 @@
                                     </div>
                                 }
                             </div>
-                            <div class="mt-2 text-sm text-slate-500">
+                            <div class="mt-4 text-xs text-slate-500">
                                 Difficulty: @question.QuestionDifficulty | Points: @question.Score
                             </div>
 
                             <div class="w-full bg-slate-200 rounded-full h-2.5 mt-4">
-                                <div class="bg-slate-600 h-2.5 rounded-full"
+                                <div class="bg-slate-950 h-2.5 rounded-full"
                                     style="width: @(100 - ((double)timeLeft / GetQuestionTimeLimit(question) * 100))%"></div>
                             </div>
                         </div>
 
-                        <div class="flex justify-between mt-4">
+                        <div class="w-sm sm:w-sm md:w-2xl mx-auto flex justify-between mt-4 text-sm">
                             <div class="text-slate-600">
-                                Question @(currentQuestionIndex + 1) of @questions.Count
+                                @(currentQuestionIndex + 1) of @questions.Count
                             </div>
                             <div class="text-slate-600">
                                 Advancing automatically when time expires
@@ -108,18 +111,17 @@
             }
             else
             {
-                <div class="bg-white p-6 rounded-lg w-3xl">
+                <div class="bg-white p-6 rounded-lg w-sm sm:w-sm md:w-3xl mx-auto">
                     <h2 class="text-2xl font-bold mb-4 text-center">Results</h2>
+                    <div class="text-center">
+                        <p class="font-medium">You scored: <span class="font-bold">@score</span> out of <span
+                                class="font-bold">@totalPossibleScore</span></p>
+                        <p class="font-medium mb-4">Percentage: <span class="font-bold">@(Math.Round((score / totalPossibleScore) * 100,
+                                2))%</span></p>
+                    </div>
 
-                <div class="ml-4">
-                    <p class="font-medium">You scored: <span class="font-bold">@score</span> out of <span
-                            class="font-bold">@totalPossibleScore</span></p>
-                    <p class="font-medium mb-4">Percentage: <span class="font-bold">@(Math.Round((score / totalPossibleScore) * 100,
-                                                2))%</span></p>
-                </div>
-
-            <div class="mt-6 space-y-4">
-                @for (int i = 0; i < questions.Count; i++)
+                    <div class="mt-6 space-y-4">
+                        @for (int i = 0; i < questions.Count; i++)
                         {
                             var question = questions[i];
                             var userAnswerId = selectedAnswers.ContainsKey(question.QuestionID) ?
@@ -127,34 +129,23 @@
                             var correctAnswer = questionAnswers[question].FirstOrDefault(a => a.IsCorrect);
                             var isCorrect = correctAnswer != null && userAnswerId == correctAnswer.AnswerID;
 
-                                <div class="flex items-center gap-2">
-                                    <svg class="@(isCorrect ? "text-green-600" : "text-red-600") w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                        @if (isCorrect)
-                                        {
-                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                                        }
-                                        else
-                                        {
-                                            <path d="M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z"/>
-                                        }
-                                    </svg>
-                                    <h3 class="text-lg font-semibold">@(i + 1). @question.QuestionBody</h3>
-                                </div>
-                                <div class="mt-2">
-                                    @if (userAnswerId > 0)
-                                    {
-                                        var userAnswer = questionAnswers[question].FirstOrDefault(a => a.AnswerID == userAnswerId);
-                                        <p class="@(isCorrect ? "text-green-600 font-medium" : "text-red-600 font-medium") ml-4">Your answer: <span
-                                                >
-                                                @(userAnswer?.Body ?? "No answer")
-                                            </span></p>
-                                    }
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-md">@(i + 1). @question.QuestionBody</h3>
+                            </div>
+                            <div class="mt-2">
+                                @if (userAnswerId > 0)
+                                {
+                                    var userAnswer = questionAnswers[question].FirstOrDefault(a => a.AnswerID == userAnswerId);
+                                    <p class="@(isCorrect ? "text-green-600" : "text-red-600") text-sm">Your answer: <span>
+                                            @(userAnswer?.Body ?? "No answer")
+                                        </span></p>
+                                }
 
-                                    @if (!isCorrect && correctAnswer != null)
-                                    {
-                                        <p class="text-green-600 font-medium ml-4">Correct answer: @correctAnswer.Body</p>
-                                    }
-                                </div>
+                                @if (!isCorrect && correctAnswer != null)
+                                {
+                                    <p class="text-green-600 text-sm">Correct answer: @correctAnswer.Body</p>
+                                }
+                            </div>
                         }
                     </div>
 
@@ -169,14 +160,14 @@
 
             @if (!string.IsNullOrEmpty(feedback))
             {
-                <div class="mt-6 border-2 border-dashed border-slate-300 text-slate-800 px-6 py-4 rounded-lg w-3xl">
+                <div class="mt-6 border-2 border-dashed border-slate-300 text-slate-800 px-6 py-4 rounded-lg w-sm sm:w-sm md:w-3xl">
                     <div class="flex items-center justify-center mb-3">
-            <svg class="h-5 w-5 text-slate-800 mr-2"
-                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                    d="M17.7134 10.1281L17.4668 10.6938C17.2864 11.1079 16.7136 11.1079 16.5331 10.6938L16.2866 10.1281C15.8471 9.11947 15.0555 8.31641 14.0677 7.87708L13.308 7.53922C12.8973 7.35653 12.8973 6.75881 13.308 6.57612L14.0252 6.25714C15.0384 5.80651 15.8442 4.97373 16.2761 3.93083L16.5293 3.31953C16.7058 2.89349 17.2942 2.89349 17.4706 3.31953L17.7238 3.93083C18.1558 4.97373 18.9616 5.80651 19.9748 6.25714L20.6919 6.57612C21.1027 6.75881 21.1027 7.35653 20.6919 7.53922L19.9323 7.87708C18.9445 8.31641 18.1529 9.11947 17.7134 10.1281ZM2.82843 12.0001L7.07107 16.2428L5.65685 17.657L0 12.0001L5.65685 6.34326L7.07107 7.75748L2.82843 12.0001ZM18.3429 17.6572L23.9998 12.0003L21.1714 9.17188L19.7571 10.5861L21.1714 12.0003L16.9287 16.2429L18.3429 17.6572Z">
-                </path>
-            </svg>
+                        <svg class="h-5 w-5 text-slate-800 mr-2"
+                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M17.7134 10.1281L17.4668 10.6938C17.2864 11.1079 16.7136 11.1079 16.5331 10.6938L16.2866 10.1281C15.8471 9.11947 15.0555 8.31641 14.0677 7.87708L13.308 7.53922C12.8973 7.35653 12.8973 6.75881 13.308 6.57612L14.0252 6.25714C15.0384 5.80651 15.8442 4.97373 16.2761 3.93083L16.5293 3.31953C16.7058 2.89349 17.2942 2.89349 17.4706 3.31953L17.7238 3.93083C18.1558 4.97373 18.9616 5.80651 19.9748 6.25714L20.6919 6.57612C21.1027 6.75881 21.1027 7.35653 20.6919 7.53922L19.9323 7.87708C18.9445 8.31641 18.1529 9.11947 17.7134 10.1281ZM2.82843 12.0001L7.07107 16.2428L5.65685 17.657L0 12.0001L5.65685 6.34326L7.07107 7.75748L2.82843 12.0001ZM18.3429 17.6572L23.9998 12.0003L21.1714 9.17188L19.7571 10.5861L21.1714 12.0003L16.9287 16.2429L18.3429 17.6572Z">
+                            </path>
+                        </svg>
                         <h3 class="font-bold text-slate-800">AI Analysis & Feedback</h3>
                     </div>
                     <div class="text-center">

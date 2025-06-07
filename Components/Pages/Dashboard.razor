@@ -12,8 +12,8 @@
 
 <PageTitle>Dashboard | Test</PageTitle>
 
-<div class="flex items-center justify-center min-h-screen p-4">
-        <div class="text-center mb-8 fixed top-50">
+<div class="flex flex-col items-center justify-center min-h-screen p-12">
+        <div class="text-center mb-8">
             <h1 class="text-3xl font-bold m-2">Dashboard</h1>
             <hr class="w-48 h-0.5 mx-auto bg-slate-950 rounded-sm">
         </div>
@@ -25,9 +25,9 @@
     }
     else
     {
-        <div class="flex items-center justify-center min-h-screen">
+        <div class="flex flex-col md:flex-row sm:flex-col items-center justify-center">
             <!-- Action Buttons Grid -->
-            <div class="w-80 h-80 bg-white m-2 rounded p-6 flex flex-col items justify-center">
+            <div class="size-80 bg-white m-2 rounded p-6 flex flex-col items justify-center">
                 <h3 class="text-xl font-bold mb-4 text-slate-950 text-center">Quick Actions</h3>
 
                 @if (userType == "Educator")
@@ -73,7 +73,7 @@
             </div>
 
             <!-- Activity Card -->
-            <div class="w-80 h-80 bg-white m-2 rounded p-6 flex flex-col items justify-center">
+            <div class="size-80 bg-white m-2 rounded p-6 flex flex-col items-center justify-center">
                 @if (userType == "Educator")
                 {
                     <h3 class="text-xl font-bold mb-4 text-slate-950 text-center">Stats</h3>
@@ -137,7 +137,7 @@
             </div>
 
             <!-- User Information Card -->
-            <div class="w-80 h-80 bg-white m-2 rounded p-6 flex flex-col items justify-center">
+            <div class="size-80 bg-white m-2 rounded p-6 flex flex-col items justify-center">
                 <h3 class="text-xl font-bold mb-4 text-slate-950 text-center">User Information</h3>
 
                 <div class="space-y-4">
